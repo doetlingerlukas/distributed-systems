@@ -2,3 +2,10 @@
 
 *.idea
 /out
+
+#LaTeX Excludes
+
+*.pdf
+*.gz
+*.log
+*.aux

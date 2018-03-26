@@ -1,0 +1,67 @@
+% !TEX TS-program = xelatex
+%
+\documentclass{article}
+\usepackage[T1]{fontenc}
+
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{upgreek}
+\usepackage{amsmath}
+\usepackage{color}
+
+
+\begin{document}
+  \title{Hw01 - Distributed Systems}
+  \date{}
+  \author{Lukas Dötlinger, 01518316}
+
+  \maketitle
+  
+  \section{Distribution Transparency}
+    
+    Scalability for a distributed systems means that it can be scaled down and up, i.e. adding or removing nodes, at any time without the user taking notice.\\
+    \newline
+    Transparency \textbf{Access} \textcolor{green}{needs} to be implemented since when scaling a distributed system, the representation of an object or the way it's accessed may be changed. This should not be visible for a client.\\
+    Transparency \textbf{Location} \textcolor{green}{needs} to be implemented since when scaling a distributed system, the location of an object may be changed somehow. When scaling, a location could be added or removed, which results in movement of the objects. Scaling might be noticed if objects are suddenly at another location.\\
+    Transparency \textbf{Relocation} \textcolor{green}{needs} to be implemented since when scaling a distributed system, objects will be moved to another location very likely. If the system is planned to be scaled while in use, relocation transparency is needed. Clients will otherwise notice that a scale has happened.\\
+    Transparency \textbf{Migration} \textcolor{green}{needs} to be implemented since when scaling a distributed system, an object may be moved to another location to better distribute workload or because of the removal of a node.\\
+    Transparency \textbf{Replication} \textcolor{red}{doesn't need} to be implemented since replication in a distributed system is used to implement higher reliability, which is not needed if we are only aiming for a highly scalable system for only desktop computers. Replication doesn't indicate that scaling has happened.\\
+    Transparency \textbf{Concurrency} \textcolor{red}{doesn't need} to be implemented since concurrent access doesn't relate to scaling in any way. If the target is to implement scaling transparency, concurrent transparency may still be left unimplemented.\\
+    Transparency \textbf{Failure} \textcolor{red}{doesn't need} to be implemented since we only care about the scalability. Therefore clients can see the failure and recovery of an object.\\
+    
+  \newpage
+  \section{Scalability}
+    
+    \subsection*{a) }
+      
+      The percentage of efficiency is the execution time with one node divided by the execution time with the maximum amount of nodes:
+      
+      \[ E(p*R, L) = \dfrac{T(1, L)}{p*T(p*R, L)} \]
+      
+      The scalability of a system is good, if the problem size \textit{L} doesn't increase with the amount of nodes \textit{R}. Therefore the scalability is the execution time with the initial execution time divided by the new execution time, where amount of nodes an problem size were changed: 
+      
+      \[ S(p*R, N*L) = \dfrac{T(R, L)}{T(p*R, N*L)} \]
+      
+    \subsection*{b) }
+    
+      \textbf{Well-scaling System:} \\
+      $T(1, L) = T(R, L) = 5$ \hspace{1cm}
+      $T(5*R, L) = 1$ \hspace{1cm}
+      $T(5*r, 5*L) = 5$ \\
+      \newline
+      $E(5*R, L)= \dfrac{T(1, L)}{5*T(5*R, L)} = \dfrac{5}{5*1} = \dfrac{5}{5} = 1 \approx 100\% $ efficiency.\\
+      $S(5*R, 5*L)= \dfrac{T(R, L)}{T(5*R, 5*L)} = \dfrac{5}{5} = 1 \approx 100\%$ scalability.\\
+      \vspace{1cm}
+      \newline
+      \textbf{Badly-scaling System:} \\
+      $T(1, L) = T(R, L) = 5$ \hspace{1cm}
+      $T(5*R, L) = 3$ \hspace{1cm}
+      $T(5*r, 5*L) = 15$\\
+      \newline
+      $E(5*R, L)= \dfrac{T(1, L)}{5*T(5*R, L)} = \dfrac{5}{5*3} = \dfrac{5}{15} = 0.3\overline{3} \approx 33.3\overline{3} \% $ efficiency.\\
+      $S(5*R, 5*L)= \dfrac{T(R, L)}{T(5*R, 5*L)} = \dfrac{5}{15} = 0.3\overline{3} \approx 33.3\overline{3} \%$ scalability.\\
+      \vspace{1cm}
+      \newline
+      \textcolor{red}{Badly-scaling System} $ < $ \textcolor{green}{Well-scaling System}
+
+\end{document}
