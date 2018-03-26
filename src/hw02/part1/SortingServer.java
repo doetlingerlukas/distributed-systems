@@ -5,6 +5,9 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -14,9 +17,11 @@ import java.util.stream.Stream;
 public class SortingServer implements Runnable {
 
   private Socket socket;
+  private ServerSocket serverSocket;
 
-  public SortingServer(Socket socket) {
+  public SortingServer(Socket socket, ServerSocket serverSocket) {
     this.socket = socket;
+    this.serverSocket = serverSocket;
   }
 
   /**
@@ -28,12 +33,20 @@ public class SortingServer implements Runnable {
             .collect(Collectors.joining());
   }
 
+  /**
+   * Method to handle a clients request and reply to it.
+   */
   public void reply() {
     try {
       DataInputStream input = new DataInputStream(socket.getInputStream());
       DataOutputStream output = new DataOutputStream(socket.getOutputStream());
 
-      output.writeUTF(sortString(input.readUTF()));
+      String toSort = input.readUTF();
+
+      if(toSort.equals("-shutdown-")) {
+        serverSocket.close();
+      }
+      output.writeUTF(sortString(toSort));
       socket.close();
 
     } catch (IOException e) {
@@ -42,14 +55,25 @@ public class SortingServer implements Runnable {
     }
   }
 
-  public static void main(String[] args) throws IOException {
-    ServerSocket serverSocket = new ServerSocket(8888);
+  public static void main(String[] args) {
+    ExecutorService es = Executors.newFixedThreadPool(5);
+    try {
+      ServerSocket serverSocket = new ServerSocket(8888);
 
-    while (true) {
-      Socket socket = serverSocket.accept();
-      System.out.println("Accepted new Client!");
-      //Server starts a new request handler.
-      new Thread(new SortingServer(socket)).start();
+      while (true) {
+        Socket socket = serverSocket.accept();
+        System.out.println("Accepted new Client!");
+        //Server starts a new request handler.
+        es.submit(new SortingServer(socket, serverSocket));
+      }
+    } catch (SocketException se) {
+      System.out.println("Shutting down server!");
+      es.shutdown();
+    } catch (IOException ioe) {
+      System.err.println("IOException occurred!");
+      ioe.printStackTrace();
+    } finally {
+      System.out.println("Shutdown successful!");
     }
   }
 

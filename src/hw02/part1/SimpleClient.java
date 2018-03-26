@@ -20,6 +20,9 @@ public class SimpleClient implements Runnable {
     this.toSort = toSort;
   }
 
+  /**
+   * Method to send a request to the server.
+   */
   public void request() {
     try {
       Socket socket = new Socket(server, port);
