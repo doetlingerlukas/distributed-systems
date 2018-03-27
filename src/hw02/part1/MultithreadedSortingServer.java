@@ -14,12 +14,12 @@ import java.util.stream.Stream;
 /**
  * Created by Lukas Dötlinger.
  */
-public class SortingServer implements Runnable {
+public class MultithreadedSortingServer implements Runnable {
 
   private Socket socket;
   private ServerSocket serverSocket;
 
-  public SortingServer(Socket socket, ServerSocket serverSocket) {
+  public MultithreadedSortingServer(Socket socket, ServerSocket serverSocket) {
     this.socket = socket;
     this.serverSocket = serverSocket;
   }
@@ -64,7 +64,7 @@ public class SortingServer implements Runnable {
         Socket socket = serverSocket.accept();
         System.out.println("Accepted new Client!");
         //Server starts a new request handler.
-        es.submit(new SortingServer(socket, serverSocket));
+        es.submit(new MultithreadedSortingServer(socket, serverSocket));
       }
     } catch (SocketException se) {
       System.out.println("Shutting down server!");

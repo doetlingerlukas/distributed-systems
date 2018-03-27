@@ -9,7 +9,7 @@ import java.util.stream.IntStream;
 /**
  * Created by Lukas Dötlinger.
  */
-public class ClientExecutor {
+public class SimpleClientExecutor {
 
   /**
    * Method to generate a random String of a given size.
