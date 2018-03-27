@@ -17,10 +17,12 @@ import java.util.stream.Stream;
 public class EndPointSortingServer implements Runnable {
 
   private int id;
+  private int port;
   private ServerSocket serverSocket;
 
   public EndPointSortingServer(int port, int id) {
     this.id = id;
+    this.port = port;
     try {
       this.serverSocket = new ServerSocket(port);
     } catch (IOException e) {
@@ -76,5 +78,9 @@ public class EndPointSortingServer implements Runnable {
 
   public int getId() {
     return id;
+  }
+
+  public int getPort() {
+    return port;
   }
 }

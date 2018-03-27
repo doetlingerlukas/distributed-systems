@@ -17,16 +17,12 @@ import java.util.stream.IntStream;
  */
 public class ProxyServer implements Runnable{
 
-  private int port;
-  private String server;
-  private int serverId;
+  private ServerData serverData;
   private Socket clientSocket;
   private ServerSocket proxySocket;
 
-  public ProxyServer(int port, int serverId, Socket clientSocket, ServerSocket proxySocket) {
-    this.port = port;
-    this.serverId = serverId;
-    this.server = "localhost";
+  public ProxyServer(ServerData serverData, Socket clientSocket, ServerSocket proxySocket) {
+    this.serverData = serverData;
     this.clientSocket = clientSocket;
     this.proxySocket = proxySocket;
   }
@@ -37,14 +33,14 @@ public class ProxyServer implements Runnable{
       DataOutputStream clientOutput = new DataOutputStream(clientSocket.getOutputStream());
       String toSort = clientInput.readUTF();
 
-      Socket serverSocket = new Socket(server, port);
+      Socket serverSocket = new Socket(serverData.getName(), serverData.getPort());
       DataInputStream serverInput = new DataInputStream(serverSocket.getInputStream());
       DataOutputStream serverOutput = new DataOutputStream(serverSocket.getOutputStream());
 
       serverOutput.writeUTF(toSort);
       String sorted = serverInput.readUTF();
 
-      clientOutput.writeUTF(sorted+" with end-point server "+serverId);
+      clientOutput.writeUTF(sorted+" with end-point server "+serverData.getId());
       serverSocket.close();
       clientSocket.close();
     } catch (IOException e) {
@@ -54,7 +50,7 @@ public class ProxyServer implements Runnable{
   }
 
   public static void main(String[] args) {
-    List<Integer> serverPorts = new ArrayList<>();
+    List<ServerData> servers = new ArrayList<>();
     ExecutorService es = Executors.newFixedThreadPool(4);
     try {
       //Start the end-point servers.
@@ -62,7 +58,7 @@ public class ProxyServer implements Runnable{
         .mapToObj(i -> new EndPointSortingServer(8000+i, i))
         .forEach(server -> {
           new Thread(server).start();
-          serverPorts.add(8000+server.getId());
+          servers.add(new ServerData(server.getId(), "localhost", server.getPort()));
         });
 
       ServerSocket proxySocket = new ServerSocket(8888);
@@ -71,8 +67,8 @@ public class ProxyServer implements Runnable{
         Socket clientSocket = proxySocket.accept();
         System.out.println("Proxy accepted new Client!");
 
-        int port = serverPorts.get(ThreadLocalRandom.current().nextInt(0, serverPorts.size()));
-        es.submit(new ProxyServer(port, serverPorts.indexOf(port)+1, clientSocket, proxySocket));
+        ServerData chosenServer = servers.get(ThreadLocalRandom.current().nextInt(0, servers.size()));
+        es.submit(new ProxyServer(chosenServer, clientSocket, proxySocket));
       }
     } catch (IOException e) {
       System.err.println("IOException occurred!");
