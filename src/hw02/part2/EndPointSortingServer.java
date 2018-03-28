@@ -73,6 +73,8 @@ public class EndPointSortingServer implements Runnable {
       es.shutdown();
     } catch (IOException e) {
       System.err.println("IOException occurred at EndPointServer "+id+"!");
+    } finally {
+      System.out.println("EndPointServer "+id+" closed!");
     }
   }
 

@@ -35,7 +35,6 @@ public class ClientExecutor {
       .forEach(client -> new Thread(client).start());
 
     //Start the shutdown thread.
-    /*
     new Thread(() -> {
       try {
         Socket socket = new Socket("localhost", 8888);
@@ -46,6 +45,5 @@ public class ClientExecutor {
         System.err.println("Shutdown failed!");
       }
     }).start();
-    */
   }
 }

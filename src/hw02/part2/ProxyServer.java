@@ -3,6 +3,7 @@ package hw02.part2;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -18,11 +19,13 @@ import java.util.stream.IntStream;
 public class ProxyServer implements Runnable{
 
   private ServerData serverData;
+  private List<ServerData> servers;
   private Socket clientSocket;
   private ServerSocket proxySocket;
 
-  public ProxyServer(ServerData serverData, Socket clientSocket, ServerSocket proxySocket) {
+  public ProxyServer(ServerData serverData, List<ServerData> servers, Socket clientSocket, ServerSocket proxySocket) {
     this.serverData = serverData;
+    this.servers = servers;
     this.clientSocket = clientSocket;
     this.proxySocket = proxySocket;
   }
@@ -40,9 +43,21 @@ public class ProxyServer implements Runnable{
       serverOutput.writeUTF(toSort);
       String sorted = serverInput.readUTF();
 
-      clientOutput.writeUTF(sorted+" with end-point server "+serverData.getId());
+      clientOutput.writeUTF(sorted + " with end-point server " + serverData.getId());
       serverSocket.close();
       clientSocket.close();
+
+    } catch (ConnectException e) {
+      //Connection to server was not possible. Therefore redirect to other server if possible.
+      System.out.println("Server "+serverData.getId()+" not available! Redirecting..");
+      servers.remove(serverData);
+      if (servers.isEmpty()) {
+        System.err.println("No servers are available!");
+        return;
+      }
+      this.serverData = servers.get(ThreadLocalRandom.current().nextInt(0, servers.size()));
+      run();
+
     } catch (IOException e) {
       System.err.println("Proxy failed to reply!");
       e.printStackTrace();
@@ -68,7 +83,7 @@ public class ProxyServer implements Runnable{
         System.out.println("Proxy accepted new Client!");
 
         ServerData chosenServer = servers.get(ThreadLocalRandom.current().nextInt(0, servers.size()));
-        es.submit(new ProxyServer(chosenServer, clientSocket, proxySocket));
+        es.submit(new ProxyServer(chosenServer, servers, clientSocket, proxySocket));
       }
     } catch (IOException e) {
       System.err.println("IOException occurred!");
