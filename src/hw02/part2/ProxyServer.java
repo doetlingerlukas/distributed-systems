@@ -32,14 +32,13 @@ public class ProxyServer implements Runnable{
 
   public void reply() {
     try {
+      Socket serverSocket = new Socket(serverData.getName(), serverData.getPort());
       DataInputStream clientInput = new DataInputStream(clientSocket.getInputStream());
       DataOutputStream clientOutput = new DataOutputStream(clientSocket.getOutputStream());
-      String toSort = clientInput.readUTF();
-
-      Socket serverSocket = new Socket(serverData.getName(), serverData.getPort());
       DataInputStream serverInput = new DataInputStream(serverSocket.getInputStream());
       DataOutputStream serverOutput = new DataOutputStream(serverSocket.getOutputStream());
 
+      String toSort = clientInput.readUTF();
       serverOutput.writeUTF(toSort);
       String sorted = serverInput.readUTF();
 
@@ -56,7 +55,7 @@ public class ProxyServer implements Runnable{
         return;
       }
       this.serverData = servers.get(ThreadLocalRandom.current().nextInt(0, servers.size()));
-      run();
+      reply();
 
     } catch (IOException e) {
       System.err.println("Proxy failed to reply!");
