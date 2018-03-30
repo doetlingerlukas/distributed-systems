@@ -23,8 +23,7 @@ public class ProxyServer implements Runnable{
   private Socket clientSocket;
   private ServerSocket proxySocket;
 
-  public ProxyServer(ServerData serverData, List<ServerData> servers, Socket clientSocket, ServerSocket proxySocket) {
-    this.serverData = serverData;
+  public ProxyServer(List<ServerData> servers, Socket clientSocket, ServerSocket proxySocket) {
     this.servers = servers;
     this.clientSocket = clientSocket;
     this.proxySocket = proxySocket;
@@ -32,6 +31,8 @@ public class ProxyServer implements Runnable{
 
   public void reply() {
     try {
+      this.serverData = servers.get(ThreadLocalRandom.current().nextInt(0, servers.size()));
+
       Socket serverSocket = new Socket(serverData.getName(), serverData.getPort());
       DataInputStream clientInput = new DataInputStream(clientSocket.getInputStream());
       DataOutputStream clientOutput = new DataOutputStream(clientSocket.getOutputStream());
@@ -54,7 +55,6 @@ public class ProxyServer implements Runnable{
         System.err.println("No servers are available!");
         return;
       }
-      this.serverData = servers.get(ThreadLocalRandom.current().nextInt(0, servers.size()));
       reply();
 
     } catch (IOException e) {
@@ -81,8 +81,7 @@ public class ProxyServer implements Runnable{
         Socket clientSocket = proxySocket.accept();
         System.out.println("Proxy accepted new Client!");
 
-        ServerData chosenServer = servers.get(ThreadLocalRandom.current().nextInt(0, servers.size()));
-        es.submit(new ProxyServer(chosenServer, servers, clientSocket, proxySocket));
+        es.submit(new ProxyServer(servers, clientSocket, proxySocket));
       }
     } catch (IOException e) {
       System.err.println("IOException occurred!");
