@@ -39,6 +39,9 @@ public class EndPointSortingServer implements Runnable {
       .collect(Collectors.joining());
   }
 
+  /**
+   * Method to reply to the proxy.
+   */
   public void reply(Socket clientSocket) {
     try {
       DataInputStream input = new DataInputStream(clientSocket.getInputStream());
@@ -49,6 +52,8 @@ public class EndPointSortingServer implements Runnable {
         serverSocket.close();
       }
       output.writeUTF(sortString(toSort));
+      input.close();
+      output.close();
       clientSocket.close();
     } catch (IOException e) {
       System.err.println("EndPointServer "+id+" failed to reply!");

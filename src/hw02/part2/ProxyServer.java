@@ -29,6 +29,9 @@ public class ProxyServer implements Runnable{
     this.proxySocket = proxySocket;
   }
 
+  /**
+   * Method to send a request to a server and to reply it to a client.
+   */
   public void reply() {
     try {
       this.serverData = servers.get(ThreadLocalRandom.current().nextInt(0, servers.size()));
@@ -44,6 +47,10 @@ public class ProxyServer implements Runnable{
       String sorted = serverInput.readUTF();
 
       clientOutput.writeUTF(sorted + " with end-point server " + serverData.getId());
+      clientInput.close();
+      clientOutput.close();
+      serverInput.close();
+      serverOutput.close();
       serverSocket.close();
       clientSocket.close();
 
@@ -61,6 +68,11 @@ public class ProxyServer implements Runnable{
       System.err.println("Proxy failed to reply!");
       e.printStackTrace();
     }
+  }
+
+  @Override
+  public void run() {
+    reply();
   }
 
   public static void main(String[] args) {
@@ -87,10 +99,5 @@ public class ProxyServer implements Runnable{
       System.err.println("IOException occurred!");
       e.printStackTrace();
     }
-  }
-
-  @Override
-  public void run() {
-    reply();
   }
 }

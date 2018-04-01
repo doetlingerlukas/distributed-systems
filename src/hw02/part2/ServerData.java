@@ -19,23 +19,11 @@ public class ServerData {
     return id;
   }
 
-  public void setId(int id) {
-    this.id = id;
-  }
-
   public String getName() {
     return name;
   }
 
-  public void setName(String name) {
-    this.name = name;
-  }
-
   public int getPort() {
     return port;
-  }
-
-  public void setPort(int port) {
-    this.port = port;
   }
 }
