@@ -47,8 +47,6 @@ public class MultithreadedSortingServer implements Runnable {
         serverSocket.close();
       }
       output.writeUTF(sortString(toSort));
-      input.close();
-      output.close();
       socket.close();
     } catch (IOException e) {
       System.err.println("Failed to reply!");

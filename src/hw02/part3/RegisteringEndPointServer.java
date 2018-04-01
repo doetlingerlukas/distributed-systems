@@ -52,10 +52,9 @@ public class RegisteringEndPointServer implements Runnable {
 
       if(toSort.equals("-shutdown-")) {
         serverSocket.close();
+      } else {
+        output.writeUTF(sortString(toSort));
       }
-      output.writeUTF(sortString(toSort));
-      input.close();
-      output.close();
       clientSocket.close();
     } catch (IOException e) {
       System.err.println("EndPointServer "+id+" failed to reply!");
@@ -74,8 +73,6 @@ public class RegisteringEndPointServer implements Runnable {
       if (input.readUTF().equals("-OK-")) {
         output.writeInt(this.port);
       }
-      input.close();
-      output.close();
       proxySocket.close();
     } catch (IOException e) {
       System.out.println("Failed while registering to the proxy!");

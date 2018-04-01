@@ -48,10 +48,6 @@ public class AdvancedProxyServer implements Runnable{
       String sorted = serverInput.readUTF();
 
       clientOutput.writeUTF(sorted + " with end-point server " + serverData.getId());
-      clientInput.close();
-      clientOutput.close();
-      serverInput.close();
-      serverOutput.close();
       serverSocket.close();
       clientSocket.close();
 
@@ -102,8 +98,7 @@ public class AdvancedProxyServer implements Runnable{
           int port = input.readInt();
           servers.add(new ServerData(port-8000, "localhost", port));
           System.out.println("Proxy accepted new Server on port "+port+"!");
-          input.close();
-          output.close();
+          clientSocket.close();
         } else {
           System.out.println("Proxy accepted new Client!");
           es.submit(new AdvancedProxyServer(servers, clientSocket, inputString));

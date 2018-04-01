@@ -47,10 +47,6 @@ public class ProxyServer implements Runnable{
       String sorted = serverInput.readUTF();
 
       clientOutput.writeUTF(sorted + " with end-point server " + serverData.getId());
-      clientInput.close();
-      clientOutput.close();
-      serverInput.close();
-      serverOutput.close();
       serverSocket.close();
       clientSocket.close();
 

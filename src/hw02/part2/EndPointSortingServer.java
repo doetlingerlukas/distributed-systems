@@ -50,10 +50,9 @@ public class EndPointSortingServer implements Runnable {
 
       if(toSort.equals("-shutdown-")) {
         serverSocket.close();
+      } else {
+        output.writeUTF(sortString(toSort));
       }
-      output.writeUTF(sortString(toSort));
-      input.close();
-      output.close();
       clientSocket.close();
     } catch (IOException e) {
       System.err.println("EndPointServer "+id+" failed to reply!");
