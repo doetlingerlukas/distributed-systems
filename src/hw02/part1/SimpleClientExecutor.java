@@ -15,7 +15,7 @@ public class SimpleClientExecutor {
    * Method to generate a random String of a given size.
    */
   public static String getRandomString(int size) {
-    String alphabet = "abcdefghijklmnopqrstuvwxyz";
+    String alphabet = "abcdefghijklmnopqrstuvwxyz123456789";
     return ThreadLocalRandom.current()
       .ints(0, alphabet.length())
       .limit(size)
@@ -25,7 +25,8 @@ public class SimpleClientExecutor {
   }
 
   /**
-   * Starts 3 clients, which will submit a random String to sort to the server.
+   * Starts 6 clients, which will submit a random String to sort to the server.
+   * Starts a thread to remotely shutdown the server.
    */
   public static void main(String[] args) {
     IntStream.rangeClosed(1,6)
@@ -38,6 +39,7 @@ public class SimpleClientExecutor {
         Socket socket = new Socket("localhost", 8888);
         DataOutputStream output = new DataOutputStream(socket.getOutputStream());
         output.writeUTF("-shutdown-");
+        output.close();
         socket.close();
       } catch (Exception e) {
         System.err.println("Shutdown failed!");

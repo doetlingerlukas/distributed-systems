@@ -33,6 +33,8 @@ public class SimpleClient implements Runnable {
 
       output.writeUTF(toSort);
       System.out.println("Server changed "+toSort+" to "+input.readUTF());
+      input.close();
+      output.close();
       socket.close();
     } catch (IOException e) {
       System.err.println("Failed to request!");

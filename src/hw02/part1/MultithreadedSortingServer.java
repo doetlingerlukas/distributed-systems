@@ -47,12 +47,18 @@ public class MultithreadedSortingServer implements Runnable {
         serverSocket.close();
       }
       output.writeUTF(sortString(toSort));
+      input.close();
+      output.close();
       socket.close();
-
     } catch (IOException e) {
       System.err.println("Failed to reply!");
       e.printStackTrace();
     }
+  }
+
+  @Override
+  public void run() {
+    reply();
   }
 
   public static void main(String[] args) {
@@ -75,10 +81,5 @@ public class MultithreadedSortingServer implements Runnable {
     } finally {
       System.out.println("Shutdown successful!");
     }
-  }
-
-  @Override
-  public void run() {
-    reply();
   }
 }
