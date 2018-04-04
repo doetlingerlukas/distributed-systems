@@ -39,7 +39,6 @@ public class SimpleClientExecutor {
         Socket socket = new Socket("localhost", 8888);
         DataOutputStream output = new DataOutputStream(socket.getOutputStream());
         output.writeUTF("-shutdown-");
-        output.close();
         socket.close();
       } catch (Exception e) {
         System.err.println("Shutdown failed!");
