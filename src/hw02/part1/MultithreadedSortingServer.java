@@ -1,68 +1,36 @@
 package hw02.part1;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
+import hw02.utils.Protocol;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Created by Lukas Dötlinger.
  */
 public class MultithreadedSortingServer implements Runnable {
 
-  private Socket socket;
+  private Socket clientSocket;
   private ServerSocket serverSocket;
 
-  public MultithreadedSortingServer(Socket socket, ServerSocket serverSocket) {
-    this.socket = socket;
+  public MultithreadedSortingServer(Socket clientSocket, ServerSocket serverSocket) {
+    this.clientSocket = clientSocket;
     this.serverSocket = serverSocket;
-  }
-
-  /**
-   * Method to sort a string.
-   */
-  public String sortString(String toSort) {
-    return Stream.of(toSort.split(""))
-            .sorted()
-            .collect(Collectors.joining());
-  }
-
-  /**
-   * Method to handle a clients request and reply to it.
-   */
-  public void reply() {
-    try {
-      DataInputStream input = new DataInputStream(socket.getInputStream());
-      DataOutputStream output = new DataOutputStream(socket.getOutputStream());
-
-      String toSort = input.readUTF();
-
-      if(toSort.equals("-shutdown-")) {
-        serverSocket.close();
-      }
-      output.writeUTF(sortString(toSort));
-      socket.close();
-    } catch (IOException e) {
-      System.err.println("Failed to reply!");
-      e.printStackTrace();
-    }
   }
 
   @Override
   public void run() {
-    reply();
+    Protocol.reply(clientSocket, serverSocket);
   }
 
   public static void main(String[] args) {
     ExecutorService es = Executors.newFixedThreadPool(5);
     try {
-      ServerSocket serverSocket = new ServerSocket(8888);
+      ServerSocket serverSocket = new ServerSocket(Protocol.getServerPort());
 
       while (true) {
         Socket socket = serverSocket.accept();

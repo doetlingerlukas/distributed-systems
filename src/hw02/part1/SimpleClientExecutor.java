@@ -1,5 +1,7 @@
 package hw02.part1;
 
+import hw02.utils.Protocol;
+
 import java.io.DataOutputStream;
 import java.net.Socket;
 import java.util.concurrent.ThreadLocalRandom;
@@ -30,13 +32,13 @@ public class SimpleClientExecutor {
    */
   public static void main(String[] args) {
     IntStream.rangeClosed(1,6)
-      .mapToObj(i -> new SimpleClient(8888, "localhost", getRandomString(10)))
+      .mapToObj(i -> new SimpleClient(getRandomString(10)))
       .forEach(client -> new Thread(client).start());
 
     //Start the shutdown thread.
     new Thread(() -> {
       try {
-        Socket socket = new Socket("localhost", 8888);
+        Socket socket = new Socket(Protocol.getServerName(), Protocol.getServerPort());
         DataOutputStream output = new DataOutputStream(socket.getOutputStream());
         output.writeUTF("-shutdown-");
         socket.close();

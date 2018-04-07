@@ -32,7 +32,7 @@ public class ClientExecutor {
    */
   public static void main(String[] args) throws InterruptedException {
     IntStream.rangeClosed(1,6)
-      .mapToObj(i -> new SimpleClient(8888, "localhost", getRandomString(10)))
+      .mapToObj(i -> new SimpleClient(getRandomString(10)))
       .forEach(client -> new Thread(client).start());
 
     //Start the shutdown thread.
