@@ -1,4 +1,4 @@
-package hw02.part2;
+package hw02.utils;
 
 /**
  * Created by Lukas Dötlinger.

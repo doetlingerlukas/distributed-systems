@@ -1,6 +1,7 @@
 package hw02.part2;
 
 import hw02.part1.SimpleClient;
+import hw02.utils.Protocol;
 
 import java.io.DataOutputStream;
 import java.net.Socket;
@@ -38,7 +39,7 @@ public class ClientExecutor {
     //Start the shutdown thread.
     new Thread(() -> {
       try {
-        Socket socket = new Socket("localhost", 8888);
+        Socket socket = new Socket(Protocol.getServerName(), Protocol.getServerPort());
         DataOutputStream output = new DataOutputStream(socket.getOutputStream());
         output.writeUTF("-shutdown-");
         socket.close();

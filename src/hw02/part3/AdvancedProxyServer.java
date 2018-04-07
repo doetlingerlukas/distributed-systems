@@ -1,6 +1,6 @@
 package hw02.part3;
 
-import hw02.part2.ServerData;
+import hw02.utils.ServerData;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;

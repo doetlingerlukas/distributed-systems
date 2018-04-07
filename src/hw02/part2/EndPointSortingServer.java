@@ -1,15 +1,13 @@
 package hw02.part2;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
+import hw02.utils.Protocol;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Created by Lukas Dötlinger.
@@ -30,35 +28,6 @@ public class EndPointSortingServer implements Runnable {
     }
   }
 
-  /**
-   * Method to sort a string.
-   */
-  public String sortString(String toSort) {
-    return Stream.of(toSort.split(""))
-      .sorted()
-      .collect(Collectors.joining());
-  }
-
-  /**
-   * Method to reply to the proxy.
-   */
-  public void reply(Socket clientSocket) {
-    try {
-      DataInputStream input = new DataInputStream(clientSocket.getInputStream());
-      DataOutputStream output = new DataOutputStream(clientSocket.getOutputStream());
-      String toSort = input.readUTF();
-
-      if(toSort.equals("-shutdown-")) {
-        serverSocket.close();
-      } else {
-        output.writeUTF(sortString(toSort));
-      }
-      clientSocket.close();
-    } catch (IOException e) {
-      System.err.println("EndPointServer "+id+" failed to reply!");
-    }
-  }
-
   @Override
   public void run() {
     System.out.println("Started EndPointServer "+id+"!");
@@ -69,7 +38,7 @@ public class EndPointSortingServer implements Runnable {
         System.out.println("EndPointServer "+id+" accepted new task!");
 
         es.submit(() -> {
-          reply(socket);
+          Protocol.reply(socket, serverSocket);
         });
       }
     } catch (SocketException e) {
