@@ -1,5 +1,6 @@
 package hw02.part3;
 
+import hw02.utils.Protocol;
 import hw02.utils.ServerData;
 
 import java.io.DataInputStream;
@@ -34,7 +35,8 @@ public class AdvancedProxyServer implements Runnable{
   /**
    * Method to send a request to a server and to reply it to a client.
    */
-  public void reply() {
+  @Override
+  public void run() {
     try {
       this.serverData = servers.get(ThreadLocalRandom.current().nextInt(0, servers.size()));
 
@@ -59,7 +61,7 @@ public class AdvancedProxyServer implements Runnable{
         System.err.println("No servers are available!");
         return;
       }
-      reply();
+      run();
 
     } catch (IOException e) {
       System.err.println("Proxy failed to reply!");
@@ -67,20 +69,15 @@ public class AdvancedProxyServer implements Runnable{
     }
   }
 
-  @Override
-  public void run() {
-    reply();
-  }
-
   public static void main(String[] args) {
     List<ServerData> servers = new ArrayList<>();
     ExecutorService es = Executors.newFixedThreadPool(4);
     try {
-      ServerSocket proxyServerSocket = new ServerSocket(8888);
+      ServerSocket proxyServerSocket = new ServerSocket(Protocol.getServerPort());
 
       //Start the end-point servers.
       IntStream.rangeClosed(1,4)
-        .mapToObj(i -> new RegisteringEndPointServer(i, 8888))
+        .mapToObj(i -> new RegisteringEndPointServer(i))
         .forEach(server -> {
           new Thread(server).start();
         });
@@ -96,7 +93,7 @@ public class AdvancedProxyServer implements Runnable{
         if (inputString.equals("-registration-")) {
           output.writeUTF("-OK-");
           int port = input.readInt();
-          servers.add(new ServerData(port-8000, "localhost", port));
+          servers.add(new ServerData(port-8000, Protocol.getServerName(), port));
           System.out.println("Proxy accepted new Server on port "+port+"!");
           clientSocket.close();
         } else {

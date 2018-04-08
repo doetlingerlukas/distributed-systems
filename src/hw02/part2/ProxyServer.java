@@ -1,5 +1,6 @@
 package hw02.part2;
 
+import hw02.utils.Protocol;
 import hw02.utils.ServerData;
 
 import java.io.DataInputStream;
@@ -34,7 +35,8 @@ public class ProxyServer implements Runnable{
   /**
    * Method to send a request to a server and to reply it to a client.
    */
-  public void reply() {
+  @Override
+  public void run() {
     try {
       this.serverData = servers.get(ThreadLocalRandom.current().nextInt(0, servers.size()));
 
@@ -60,17 +62,12 @@ public class ProxyServer implements Runnable{
         System.err.println("No servers are available!");
         return;
       }
-      reply();
+      run();
 
     } catch (IOException e) {
       System.err.println("Proxy failed to reply!");
       e.printStackTrace();
     }
-  }
-
-  @Override
-  public void run() {
-    reply();
   }
 
   public static void main(String[] args) {
@@ -85,7 +82,7 @@ public class ProxyServer implements Runnable{
           servers.add(new ServerData(server.getId(), "localhost", server.getPort()));
         });
 
-      ServerSocket proxySocket = new ServerSocket(8888);
+      ServerSocket proxySocket = new ServerSocket(Protocol.getServerPort());
 
       while (true) {
         Socket clientSocket = proxySocket.accept();
