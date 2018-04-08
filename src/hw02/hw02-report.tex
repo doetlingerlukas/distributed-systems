@@ -141,5 +141,72 @@
         
         Process finished with exit code 0
       \end{lstlisting}
+      
+  \section*{Part 3)}
+  
+    The third part is an extension to part2. Reimplements two classes:
+    \begin{itemize}
+      \item \texttt{/part3/AdvancedProxyServer.java} is a reimplementation of the previous proxy.
+      \item \texttt{/part3/RegisteringEndPointServer.java} is a reimplementation of the previous end-point-server.
+    \end{itemize}
+	The difference to the previous proxy-server is that \texttt{AdvancedProxyServer.java} doesn't add the end-point-servers to the list while starting them. Although the proxy still starts the servers, it is not necessary, since they are registering automatically (this is only done so that one doesn't have to execute more than two java classes).\\
+	A \texttt{RegisteringEndPointServer} registers itself (opens a socket connection) automatically to the proxy be sending an predefined string, \textit{-registration-}, on which the proxy answers with \textit{-OK-}. After that, the server will send it's port to the proxy. Every end-point-server trys to register to the proxy, before entering the \texttt{while(true)} loop to accept clients. This is the only difference to the end-point-server of part2.\\
+	Before giving a client socket to a request handling thread, the proxy reads the input string to check whether it is a registering server or a requesting client. Registrations are directly handled by the main proxy thread, to update it's list of available services, which is passed to the client-request handling threads.\\
+	The whole client implementation stays the same.
+  
+    \subsection*{run part3)}
+      
+      To execute the third part, two classes have to be run:
+      \begin{itemize}
+      	\item[1.] Run the main method of \texttt{/part3/AdvancedProxyServer.java}
+      	\item[2.] Run the main method of \texttt{/part2/ClientExecutor.java}
+      \end{itemize}
+      Sample output:\\
+      \textbf{AdvancedProxyServer.java}:\\
+      \begin{lstlisting}[language=sh]
+        Proxy accepted new Server on port 8001!
+        Proxy accepted new Server on port 8004!
+        Started EndPointServer 4!
+        Proxy accepted new Server on port 8002!
+        Started EndPointServer 2!
+        Proxy accepted new Server on port 8003!
+        Started EndPointServer 3!
+        Started EndPointServer 1!
+        Proxy accepted new Client!
+        Proxy accepted new Client!
+        Proxy accepted new Client!
+        Proxy accepted new Client!
+        Proxy accepted new Client!
+        Proxy accepted new Client!
+        Proxy accepted new Client!
+        EndPointServer 4 accepted new task!
+        EndPointServer 1 accepted new task!
+        EndPointServer 3 accepted new task!
+        EndPointServer 4 accepted new task!
+        EndPointServer 4 shutting down!
+        EndPointServer 4 closed!
+        EndPointServer 2 accepted new task!
+        Server 4 not available! Redirecting..
+        Server 4 not available! Redirecting..
+        EndPointServer 1 accepted new task!
+        EndPointServer 3 accepted new task!
+      \end{lstlisting}
+      \textbf{ClientExecutor.java}:\\
+      \begin{lstlisting}[language=sh]
+        Connected to server on port 8888.
+        Connected to server on port 8888.
+        Connected to server on port 8888.
+        Connected to server on port 8888.
+        Connected to server on port 8888.
+        Connected to server on port 8888.
+        Server changed klti3ba79i to 379abiiklt with end-point server 1
+        Server changed 9ay2xw1g15 to 11259agwxy with end-point server 4
+        Server changed 9q1e49xt9m to 14999emqtx with end-point server 3
+        Server changed zwpojest7a to 7aejopstwz with end-point server 2
+        Server changed rfhrx6nxaf to 6affhnrrxx with end-point server 3
+        Server changed eltz1lu4k6 to 146eklltuz with end-point server 1
+        
+        Process finished with exit code 0
+      \end{lstlisting}
 	
 \end{document}
