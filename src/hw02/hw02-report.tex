@@ -23,16 +23,18 @@
 	
   \section*{Part 1)}
 	
-    The first part is implemented using three Java classes, which are inside the \texttt{/part1} directory:
+    The first part is implemented using four Java classes, which are inside the \texttt{/part1} and \texttt{/utils} directories:
     \begin{itemize}
-      \item \texttt{SimpleClient.java} represents a single client thread.
-      \item \texttt{SimpleClientExecutor.java}, a class to start and execute client threads.
-      \item \texttt{MultithreadedSortingServer.java} represents the server.
+      \item \texttt{/part1/SimpleClient.java} represents a single client thread.
+      \item \texttt{/part1/SimpleClientExecutor.java}, a class to start and execute client threads.
+      \item \texttt{/part1/MultithreadedSortingServer.java} represents the server.
+      \item \texttt{/utils/Protocol.java}, the utility class.
     \end{itemize}
-    \texttt{SimpleClient.java} implements the \texttt{Runnable} interface and can therefore be started as thread. It has three private variables: \texttt{int port} the servers port, \texttt{String server} the address of the server and \texttt{String toSort} the string the client wants to be sorted by the server. When construction an instance of this class, all variables have to be given. Since it implements the \texttt{Runnable} interface, it has a \texttt{void run()} method, which calls the \texttt{void request()} method. The request method is the main action of the thread. It gets the servers \texttt{Socket} by it's address and port. After that it opens the input/output-streams and calls \texttt{output.writeUTF(toSort)} to write the unsorted string to servers input-stream. Then it waits until the server writes something to the clients input and reads it with \texttt{input.readUTF()}, to print it to the command-line. The client thread ends after that.\\
+    \texttt{SimpleClient.java} implements the \texttt{Runnable} interface and can therefore be started as thread. It has one private variable, \texttt{String toSort}, which is the string the client wants to be sorted by the server. The \texttt{void run()} method calls the \texttt{void request(String toSort)} method from the utility class \texttt{Protocol.java}.\\
+    The utility request method gets the servers \texttt{Socket}. Address and port of the server are defined as \texttt{final} variables in \texttt{Protocol.java} and are accessible through getters. The method opens the input/output-streams and calls \texttt{output.writeUTF(toSort)} to write the unsorted string to servers input-stream. When the server writes something to the clients input, it reads it with \texttt{input.readUTF()}, to print it to the command-line.\\
     \texttt{SimpleClientExecutor.java} is a class to start several clients and also to initiate the remote shut-down of the server. It also has a method \texttt{String getRandomString(int size)}, which creates a random string for a given length of the given alphabet (all letters + numbers). The main method of this class simply generates six instances of the \texttt{SimpleClient} class and starts them as a thread. Every instance is created with a different random string. The class also starts a specific thread, which connects to the server and sends the string \textit{-shutdown-}. This starts the shut-down process on the server side.\\
-    \texttt{MultithreadedSortingServer.java} implements the \texttt{Runnable} interface and represents the server. The method \texttt{String sortString(String toSort)} uses Java 8 streams to sort a string. In the main method, this class starts an \texttt{ExecutorService} with a fixed thread-pool. Inside a \texttt{try} it starts a \texttt{ServerSocket} and accepts clients inside a \texttt{while(true)} loop. For each new client, a instance of \texttt{MultithreadedSortingServer} is submitted to thread-pool. This starts a new thread for each client. The \texttt{run()} method invokes the \texttt{reply()} method, which reads the input-stream (to get the clients unsorted string) and sorts the string. Then it writes it to the output.\\
-    Although, if the \texttt{string.equals("-shutdown-")}, the request-handling thread calls \texttt{serverSocket.close()}. This triggers a \texttt{SocketException} at the main thread, which is calling \texttt{serverSocket.accept()}. The exception is caught, which will execute \texttt{shutdown()} on the executor-service. After that, all tasks are finished and the executor-service shuts down. This also ends the main server thread.\\
+    \texttt{MultithreadedSortingServer.java} implements the \texttt{Runnable} interface and represents the server. In the main method, this class starts an \texttt{ExecutorService} with a fixed thread-pool. Inside a \texttt{try} it starts a \texttt{ServerSocket} and accepts clients inside a \texttt{while(true)} loop. For each new client, a instance of \texttt{MultithreadedSortingServer} is submitted to thread-pool. This starts a new thread for each client. The \texttt{run()} method invokes the \texttt{void reply(Socket clientSocket, ServerSocket serverSocket)} method from the utility class \texttt{Protocol.java}, which reads the input-stream (to get the clients unsorted string) and sorts the string. Then it writes it to the output. The method \texttt{String sortString(String toSort)}, als located in the utility class, uses Java 8 streams to sort the string.\\
+    Although, if the \texttt{string.equals("-shutdown-")}, the request-handling thread calls \texttt{serverSocket.close()}. This triggers a \texttt{SocketException} at the main server-thread, which is calling \texttt{serverSocket.accept()}. The exception is caught, which will execute \texttt{shutdown()} on the executor-service. After that, all tasks are finished and the executor-service shuts down. This also ends the main server thread.\\
     
     \subsection*{run part1)}
     
@@ -76,8 +78,27 @@
       
   \section*{Part 2)} 
     
+    The second part is implemented using six Java classes, which are inside the \texttt{/part1}, \texttt{/part2} and \texttt{/utils} directories:
+    \begin{itemize}
+      \item \texttt{/part1/SimpleClient.java} represents a single client thread.
+      \item \texttt{/part2/ClientExecutor.java}, a class to start and execute client threads.
+      \item \texttt{/part2/ProxyServer.java} represents the proxy-server.
+      \item \texttt{/part2/EndPointSortingServer.java} represents an end-point-server.
+      \item \texttt{/utils/Protocol.java}, the utility class.
+      \item \texttt{/utils/ServerData.java} a class representing data of a end-point-server.
+    \end{itemize}
+    The \texttt{ClientExecutor.java} does the same as in part1. It starts some clients with a random string and also the shutdown thread.\\
+    The multi-threaded \texttt{ProxyServer.java} implements the \texttt{Runnable} interface. In the main method, the proxy starts the end-point servers and adds an object of \texttt{ServerData} for each server to it's local server-list. \texttt{ServerData} stores the id, port and name of a server. After that, the proxy goes into a \texttt{while(true)} loop, where it is accepting clients. When a client connects, it submits a new instance of \texttt{ProxyServer} to it's executor-service. This thread will execute the \texttt{run()} method of the \texttt{ProxyServer.java} class, which reads the string \textit{toSort} from a client and writes it to a randomly chosen end-point-server. It then writes the answer from the end-point server to the client, attached also information on which server completed the task.\\
+    \textbf{Fault tolerance}: If the randomly chosen server is not reachable, opening a socket to it will cause an \texttt{ConnectException}, which is caught. In the catch statement, the previously chosen server is removed from the list of servers. If the server-list is not empty, a recursive call, \texttt{run()}, is called. This will repeat the process of choosing a server.\\
+    The \texttt{EndPointSortingServer.java} represents a multi-threaded end-point-server. I chose the server to have multiple threads with an executor-service. Therefore it is never unreachable because of being busy. It works similar to the server from part1. It implements the \texttt{Runnable} interface. Inside the \texttt{run()} method it accepts clients in a \texttt{while(true)} loop. Each client is handled by a new thread, submitted to an executor service. This thread uses the \texttt{void reply(Socket clientSocket, ServerSocket serverSocket)} from the utility class \texttt{Protocol.java} to answer to a client. Since the server is multi-threaded it can easily be closed remotely like in part1. 
+    
     \subsection*{run part2)}
       
+      To execute the second part, two classes have to be run:
+      \begin{itemize}
+      	\item[1.] Run the main method of \texttt{ProxyServer.java}
+      	\item[2.] Run the main method of \texttt{ClientExecutor.java}
+      \end{itemize}
       Sample output:\\
       \textbf{ProxyServer.java}:\\
       \begin{lstlisting}[language=sh]
