@@ -4,6 +4,9 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -13,18 +16,23 @@ public class ProxyServiceImpl implements ProxyService {
 
   @Override
   public String accessService(String access, String inputString, int id) {
-    String[] sorters = {"sortService1", "sortService2"};
-    String[] computers = {"computeService1", "computeService2"};
+    List<String> sorters = new ArrayList<>();
+    List<String> computers = new ArrayList<>();
     try {
       Registry registry = LocateRegistry.getRegistry(null);
+      Arrays.stream(registry.list())
+        .forEach(service -> {
+          if (service.startsWith("sort")) {sorters.add(service);}
+          else if (service.startsWith("compute")) {computers.add(service);}
+        });
 
       if (access.equals("-sort-")) {
-        String service = sorters[ThreadLocalRandom.current().nextInt(0, 2)];
+        String service = sorters.get(ThreadLocalRandom.current().nextInt(0, 2));
         SortService stub = (SortService) registry.lookup(service);
 
         return stub.sort(inputString)+" sorted by "+service+" for client "+id;
       } else if (access.equals("-compute-")) {
-        String service = computers[ThreadLocalRandom.current().nextInt(0, 2)];
+        String service = computers.get(ThreadLocalRandom.current().nextInt(0, 2));
         ComputeService stub = (ComputeService) registry.lookup(service);
 
         System.out.println(service+" starts computing for client "+id);
