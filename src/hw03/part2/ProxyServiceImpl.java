@@ -12,7 +12,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class ProxyServiceImpl implements ProxyService {
 
   @Override
-  public void accessService(String access, String inputString, int id) {
+  public String accessService(String access, String inputString, int id) {
     String[] sorters = {"sortService1", "sortService2"};
     String[] computers = {"computeService1", "computeService2"};
     try {
@@ -22,21 +22,23 @@ public class ProxyServiceImpl implements ProxyService {
         String service = sorters[ThreadLocalRandom.current().nextInt(0, 2)];
         SortService stub = (SortService) registry.lookup(service);
 
-        System.out.println(stub.sort(inputString)+" sorted by "+service+" for client "+id);
+        return stub.sort(inputString)+" sorted by "+service+" for client "+id;
       } else if (access.equals("-compute-")) {
         String service = computers[ThreadLocalRandom.current().nextInt(0, 2)];
         ComputeService stub = (ComputeService) registry.lookup(service);
 
         System.out.println(service+" starts computing for client "+id);
         stub.compute(5000L);
-        System.out.println(service+" ended computing for client "+id);
+        return service+" ended computing for client "+id;
       } else {
-        System.out.println("No rights to access service!");
+        return "No rights to access service!";
       }
     } catch (RemoteException e) {
       e.printStackTrace();
+      return "No rights to access service!";
     } catch (NotBoundException e) {
       e.printStackTrace();
+      return "No rights to access service!";
     }
   }
 }

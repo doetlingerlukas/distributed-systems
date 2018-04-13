@@ -8,6 +8,6 @@ import java.rmi.RemoteException;
  */
 public interface ProxyService extends Remote {
 
-  public void accessService(String access, String inputString, int id) throws RemoteException;
+  public String accessService(String access, String inputString, int id) throws RemoteException;
 
 }

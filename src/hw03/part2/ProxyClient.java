@@ -29,7 +29,7 @@ public class ProxyClient implements Runnable {
       Registry registry = LocateRegistry.getRegistry(null);
 
       ProxyService stub = (ProxyService) registry.lookup("proxyServer");
-      stub.accessService(access, string, id);
+      System.out.println(stub.accessService(access, string, id));
 
     } catch (RemoteException e) {
       e.printStackTrace();
