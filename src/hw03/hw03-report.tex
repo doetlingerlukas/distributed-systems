@@ -1,0 +1,104 @@
+\documentclass{article}
+\usepackage[T1]{fontenc}
+
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{upgreek}
+\usepackage{amsmath}
+\usepackage{color}
+\usepackage{listings}
+\usepackage{graphicx}
+
+\begin{document}
+  \title{Hw03 - Report - Distributed Systems}
+  \date{}
+  \author{Lukas Dötlinger, 01518316}
+	
+  \maketitle
+  
+  \section*{Introduction}
+    
+    Both parts of the homework sheet are completed.\\
+    There is a subsection at the end of every part, which contains information on how to run the code. There is also a sample output of the program given.\\
+	
+  \section*{Part 1)}
+  
+    \subsection*{a,b)}
+    
+      The interface \texttt{RemoteService.java} defines the two methods, \textit{sort} and \textit{compute}, and extends \texttt{Remote}. The methods are implemented by the \texttt{RemoteServiceImpl.java} class. The \texttt{Server.java} uses an instance of \texttt{RemoteServiceImpl} to generate a \texttt{RemoteService} \texttt{stub}, which it registers to the \texttt{Registry} under the name \textit{"remoteService"}. The \texttt{Client.java} class starts six clients, three for each method. Every client looks-up the \textit{remoteService} in the registry and uses one of it's method as an RMI call.
+      
+	\subsection*{c)}
+	
+	  Yes, the server is capable of handling multiple requests from multiple clients. This is shown in the sample output at the next subsection.\\
+	  In comparison to homework 2, it seems to be just as fast. The output for several clients seems to be printed to the console almost at the same time. 
+    
+    \subsection*{run part1)}
+    
+      To execute the first part, do the following:
+      \begin{itemize}
+    	\item[1.] Navigate to the \texttt{part1/} directory an run \texttt{javac *.java} to compile the classes
+    	\item[2.] Navigate back to the source directory
+    	\item[3.] Start the registry with \texttt{start rmiregistry}
+    	\item[4.] Start the server with \texttt{java hw03.part1.Server}
+    	\item[5.] Open a second window and start the client with \texttt{java hw03.part1.Client}
+      \end{itemize}
+      Sample output:\\
+      \textbf{Server}:\\
+      \begin{lstlisting}[language=sh]
+        $ java hw03.part1.Server
+        Successfully registered remote service!
+      \end{lstlisting}
+      \textbf{Client}:\\
+      \begin{lstlisting}[language=sh]
+        $ java hw03.part1.Client
+        Server starts computing for client 3
+        Server starts computing for client 1
+        Server starts computing for client 2
+        88akkknnqt for client 5
+        2467flpqrz for client 4
+        47889llluz for client 6
+        Server ended computing for client 3
+        Server ended computing for client 1
+        Server ended computing for client 2
+      \end{lstlisting}  
+      
+  \section*{Part 2)}
+  
+    Part 2 uses a proxy to call the right remote method for a client. Two servers, \texttt{SortServer.java} and \texttt{ComputeServer.java}, each of which implements a different service. Those servers implement the \texttt{Runnable} interface, so they can be started from another class. The proxy starts two instances for each of the two servers. On construction, a server takes an id and on start it registers it's service to the registry. The proxy also registers it's method \texttt{accessService()} to the registry. This method is invoked by a client, which will get the proxy to invoke one of the servers methods. The proxy finds the services in the registry by getting all names from the registry, \texttt{registry.list()}.\\
+    \texttt{ProxyClient.java} starts six clients, three for sorting and 3 for computing. The proxy randomly forwards the requests to a correct endpoint. 
+    
+    \subsection*{run part2)}
+    
+      To execute the second part, do the following:
+      \begin{itemize}
+        \item[1.] Navigate to the \texttt{part2/} directory an run \texttt{javac *.java} to compile the classes
+    	\item[2.] Navigate back to the source directory
+    	\item[3.] Start the registry with \texttt{start rmiregistry}
+    	\item[4.] Start the server with \texttt{java hw03.part2.ProxyServer}
+    	\item[5.] Open a second window and start the client with \texttt{java hw03.part2.ProxyClient}
+      \end{itemize}
+      Sample output:\\
+      \textbf{ProxyServer}:\\
+      \begin{lstlisting}[language=sh]
+        $ java hw03.part2.ProxyServer
+        Successfully registered sort service 2
+        Successfully registered compute service 2
+        Successfully registered proxy server!
+        Successfully registered compute service 1
+        Successfully registered sort service 1
+        computeService2 starts computing for client 2
+        computeService1 starts computing for client 3
+        computeService1 starts computing for client 1
+      \end{lstlisting}
+      \textbf{ProxyClient}:\\
+      \begin{lstlisting}[language=sh]
+        $ java hw03.part2.ProxyClient
+        1iksvwxxyy sorted by sortService2 for client 5
+        hjmprrstyz sorted by sortService1 for client 4
+        78bbhhkoyz sorted by sortService1 for client 6
+        computeService2 ended computing for client 2
+        computeService1 ended computing for client 3
+        computeService1 ended computing for client 1
+      \end{lstlisting}
+	
+\end{document}
