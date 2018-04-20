@@ -1,12 +1,10 @@
 package hw04;
 
 import java.io.EOFException;
-import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -18,10 +16,12 @@ public class NodeRequestThread implements Runnable {
 
   private String node;
   private Table table;
+  private TableEntry me;
 
-  public NodeRequestThread(String node, Table table) {
+  public NodeRequestThread(String node, Table table, TableEntry me) {
     this.node = node;
     this.table = table;
+    this.me = me;
   }
 
   public TableEntry getRandomNode(List<TableEntry> list) {
@@ -35,6 +35,9 @@ public class NodeRequestThread implements Runnable {
         TableEntry randomEntry = getRandomNode(table.getList());
         try {
           Socket socket = new Socket(randomEntry.getIp(), randomEntry.getPort());
+          ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
+          output.writeObject(me);
+
           ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
           List<TableEntry> newList = new ArrayList<>();
           try {

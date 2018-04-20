@@ -12,7 +12,7 @@ public class Main {
 
   private final static int networkSize = 8;
 
-  public static TableEntry getInitNode(List<TableEntry> nodes, int port) {
+  public static TableEntry getRandomInitNode(List<TableEntry> nodes, int port) {
     return nodes.stream()
       .filter(n -> n.getPort() != port)
       .collect(Collectors.toList())
@@ -25,7 +25,7 @@ public class Main {
       .collect(Collectors.toList());
 
     IntStream.rangeClosed(1,networkSize)
-      .mapToObj(i -> new Node(Integer.toString(i), 8000+i, getInitNode(nodes, 8000+i)))
+      .mapToObj(i -> new Node(Integer.toString(i), 8000+i, getRandomInitNode(nodes, 8000+i)))
       .forEach(n -> new Thread(n).start());
   }
 }

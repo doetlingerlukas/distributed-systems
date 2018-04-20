@@ -21,7 +21,7 @@ public class Table {
       .anyMatch(e -> e.getIp().equals(entry.getIp()) && (e.getPort() == entry.getPort()));
   }
 
-  public List<TableEntry> getList() {
+  public synchronized List<TableEntry> getList() {
     synchronized (this.list) {
       return this.list;
     }
@@ -62,7 +62,9 @@ public class Table {
 
   public void addEntry(TableEntry entry) {
     synchronized (this.list) {
-      this.list.add(entry);
+      if (!containsEntry(this.list, entry)) {
+        this.list.add(entry);
+      }
     }
   }
 
