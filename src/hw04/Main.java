@@ -1,5 +1,8 @@
 package hw04;
 
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
@@ -27,5 +30,36 @@ public class Main {
     IntStream.rangeClosed(1, networkSize)
       .mapToObj(i -> new Node(Integer.toString(i), 8000+i, getRandomInitNode(nodes, 8000+i)))
       .forEach(n -> new Thread(n).start());
+
+    try {
+      Thread.sleep(15000);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+
+    IntStream.rangeClosed(networkSize+1, networkSize+4)
+      .mapToObj(i -> new Node(Integer.toString(i), 8000+i, getRandomInitNode(nodes, 8000+i)))
+      .forEach(n -> new Thread(n).start());
+
+    try {
+      Thread.sleep(5000);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+
+    IntStream.rangeClosed(1, 3)
+      .mapToObj(i -> new Thread(() -> {
+        TableEntry toShutdown = getRandomInitNode(nodes, 8000);
+        try {
+          Socket socket = new Socket(toShutdown.getIp(), toShutdown.getPort());
+          ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
+          output.writeObject(new TableEntry("-shutdown-", 8888));
+          socket.close();
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+      }))
+      .forEach(t -> t.start());
+
   }
 }

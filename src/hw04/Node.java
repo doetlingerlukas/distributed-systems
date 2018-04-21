@@ -35,20 +35,25 @@ public class Node implements Runnable {
   public void run() {
     System.out.println("Started Node "+name+" on port "+port+"!");
 
-    // start thread to update table
-    new Thread(new NodeRequestThread(name, table, new TableEntry(ip, port))).start();
-
     // request handling
     ExecutorService es = Executors.newFixedThreadPool(4);
+
+    // start thread to update table
+    es.submit(new NodeRequestThread(name, table, new TableEntry(ip, port)));
+
     try {
       while (true) {
         Socket socket = serverSocket.accept();
         System.out.println("Node "+name+" accepted new request!");
 
-        es.submit(new NodeRequestHandler(name, table, socket, new TableEntry(ip, port)));
+        es.submit(new NodeRequestHandler(name, table, socket, serverSocket, new TableEntry(ip, port)));
       }
+    } catch (SocketException se) {
+      es.shutdown();
     } catch (Exception e) {
       System.err.println("Node "+name+" failed!");
+    } finally {
+      System.err.println("Node "+name+" left network!");
     }
   }
 }
