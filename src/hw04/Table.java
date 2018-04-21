@@ -21,15 +21,15 @@ public class Table {
       .anyMatch(e -> e.getIp().equals(entry.getIp()) && (e.getPort() == entry.getPort()));
   }
 
-  public synchronized List<TableEntry> getList() {
-    synchronized (this.list) {
+  public List<TableEntry> getList() {
+    synchronized (this) {
       return this.list;
     }
   }
 
   public String getListAsString() {
     String toReturn = "[";
-    synchronized (this.list) {
+    synchronized (this) {
       toReturn += this.list.stream()
         .mapToInt(e -> e.getPort())
         .sorted()
@@ -41,13 +41,13 @@ public class Table {
   }
 
   public boolean isEmpty() {
-    synchronized (this.list) {
+    synchronized (this) {
       return this.list.isEmpty();
     }
   }
 
   public void mergeList(List<TableEntry> toMerge) {
-    synchronized (this.list) {
+    synchronized (this) {
       toMerge.stream()
         .filter(e -> !containsEntry(this.list, e))
         .forEach(e -> this.list.add(e));
@@ -55,13 +55,13 @@ public class Table {
   }
 
   public void removeEntry(TableEntry entry) {
-    synchronized (this.list) {
+    synchronized (this) {
       this.list.remove(entry);
     }
   }
 
   public void addEntry(TableEntry entry) {
-    synchronized (this.list) {
+    synchronized (this) {
       if (!containsEntry(this.list, entry)) {
         this.list.add(entry);
       }
@@ -69,7 +69,7 @@ public class Table {
   }
 
   public int size() {
-    synchronized (this.list) {
+    synchronized (this) {
       return this.list.size();
     }
   }

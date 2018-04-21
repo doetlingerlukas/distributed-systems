@@ -24,7 +24,7 @@ public class Main {
       .mapToObj(i -> new TableEntry("localhost", 8000+i))
       .collect(Collectors.toList());
 
-    IntStream.rangeClosed(1,networkSize)
+    IntStream.rangeClosed(1, networkSize)
       .mapToObj(i -> new Node(Integer.toString(i), 8000+i, getRandomInitNode(nodes, 8000+i)))
       .forEach(n -> new Thread(n).start());
   }
