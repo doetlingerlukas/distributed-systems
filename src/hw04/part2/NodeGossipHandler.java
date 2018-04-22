@@ -1,7 +1,7 @@
 package hw04.part2;
 
-import hw04.Table;
-import hw04.TableEntry;
+import hw04.part1.Table;
+import hw04.part1.TableEntry;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;

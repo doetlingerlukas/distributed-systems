@@ -1,6 +1,6 @@
 package hw04.part3;
 
-import hw04.TableEntry;
+import hw04.part1.TableEntry;
 
 import java.io.*;
 import java.net.Socket;

@@ -1,4 +1,4 @@
-package hw04;
+package hw04.part1;
 
 import hw04.part3.NameServer;
 
@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.ConnectException;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
@@ -17,7 +16,7 @@ import java.util.stream.IntStream;
  */
 public class Main {
 
-  public final static int networkSize = 9;
+  public final static int networkSize = 15;
   public final static boolean withNameServer = false;
 
   public static TableEntry getRandomInitNode(List<TableEntry> nodes, int port) {
@@ -44,7 +43,7 @@ public class Main {
 
     IntStream.rangeClosed(1, networkSize)
       .mapToObj(i -> new Node("node"+Integer.toString(i), 8000+i,
-        getInitAsList(nodes, 8000+i, 1), 4, "normal"))
+        getInitAsList(nodes, 8000+i, 1), networkSize/3, "normal"))
       .forEach(n -> new Thread(n).start());
 
     try {
@@ -72,10 +71,8 @@ public class Main {
           ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
           output.writeObject(new TableEntry("-shutdown-", 8888, "-shutdown-"));
           socket.close();
-        } catch (ConnectException e) {
+        } catch (Exception e) {
           // Node already shut down.
-        } catch (IOException e) {
-          e.printStackTrace();
         }
       }))
       .forEach(t -> t.start());

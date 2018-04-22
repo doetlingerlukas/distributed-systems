@@ -1,4 +1,4 @@
-package hw04;
+package hw04.part1;
 
 import java.io.Serializable;
 
