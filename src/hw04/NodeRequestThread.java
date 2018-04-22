@@ -34,6 +34,7 @@ public class NodeRequestThread implements Runnable {
       if (!table.isEmpty()) {
         TableEntry randomEntry = getRandomNode(table.getList());
         try {
+          Thread.sleep(5000);
           Socket socket = new Socket(randomEntry.getIp(), randomEntry.getPort());
           ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
           output.writeObject(me);
@@ -46,9 +47,9 @@ public class NodeRequestThread implements Runnable {
           this.table.mergeList(newList);
           socket.close();
           System.out.println("Updated table for " + node + " to: "+table.getListAsString());
-          Thread.sleep(5000);
         } catch (SocketException e) {
           table.removeEntry(randomEntry);
+          System.err.println("Updated table for " + node + ", removed: "+randomEntry.getPort());
         } catch (Exception e) {
           e.printStackTrace();
         }

@@ -11,6 +11,7 @@ public class Table {
 
   private String owner;
   private List<TableEntry> list = new ArrayList<>();
+  private List<TableEntry> removed = new ArrayList<>();
 
   public Table(String owner) {
     this.owner = owner;
@@ -49,7 +50,7 @@ public class Table {
   public void mergeList(List<TableEntry> toMerge) {
     synchronized (this) {
       toMerge.stream()
-        .filter(e -> !containsEntry(this.list, e))
+        .filter(e -> !containsEntry(this.list, e) && !containsEntry(this.removed, e))
         .forEach(e -> this.list.add(e));
     }
   }
@@ -57,12 +58,13 @@ public class Table {
   public void removeEntry(TableEntry entry) {
     synchronized (this) {
       this.list.remove(entry);
+      this.removed.add(entry);
     }
   }
 
   public void addEntry(TableEntry entry) {
     synchronized (this) {
-      if (!containsEntry(this.list, entry)) {
+      if (!containsEntry(this.list, entry) && !containsEntry(this.removed, entry)) {
         this.list.add(entry);
       }
     }
