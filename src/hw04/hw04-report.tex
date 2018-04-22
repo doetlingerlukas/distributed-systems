@@ -1,0 +1,92 @@
+\documentclass{article}
+\usepackage[T1]{fontenc}
+
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{upgreek}
+\usepackage{amsmath}
+\usepackage{color}
+\usepackage{listings}
+\usepackage{graphicx}
+
+\begin{document}
+  \title{Hw04 - Report - Distributed Systems}
+  \date{}
+  \author{Lukas Dötlinger, 01518316}
+	
+  \maketitle
+  
+  \section*{Introduction}
+    
+    All parts of the homework sheet are completed.\\
+    Questions from the homework-sheet are answered here in each of the sections.
+    There is a subsection at the end of every part, which contains information on how to run the code.\\
+	
+  \section*{Part 1)}
+    
+    Each node is represented by an instance of the class \texttt{Node.java}. There are also two \texttt{Runnable} classes, \texttt{NodeRequestThread} and \texttt{NodeRequesthandler}. Every node has one \texttt{NodeRequestThread}, which contacts other nodes and gets their lists. \texttt{NodeRequestHandler} a thread which is started to answer such a request.\\
+    Each node has an object \texttt{Table}, which holds the list of nodes for a thread. This class is also \textit{thread-safe}, since more than one thread can access an instance of it at a time. I used \texttt{ReentrantLock} for this feature.\\
+    \texttt{Main.java} initializes the nodes and starts them. There is a \texttt{final} variable at the top of the class, which indicates the amounts of nodes to create. It also shuts down nodes and adds new ones after some \texttt{sleep} time.\\
+    \newline
+    \textit{How can you solve a possible problem of segregating the network?}\\
+	\textbf{A special feature of my implementation:} When a node requests the table of another node, it first sends it's ip and port, so the other node knows who contacted it. Therefore the possibility of network segregation in the beginning is very low.\\
+	Also if the nodes would have bigger tables, the possibility of segregation would be further decrease.\\
+	\newline
+	\textit{How can you join these separated parts?}\\
+	There is no chance, other than an out of the network solution, to join separated parts together. A server with a list of all nodes in the network would be a possibility. Although avoiding the separation of any network part in the first place would be a much nicer solution.\\	   
+    
+    \subsection*{run part1)}
+    
+      To execute the first part, do the following:
+      \begin{itemize}
+    	\item[1.] Navigate to the \texttt{part1/} directory.
+    	\item[2.] Run the main method of the java class \texttt{Main.java}
+      \end{itemize} 
+      
+  \section*{Part 2)}
+  
+    \textit{Describe an “effective” way of gossiping.}\\
+    I implemented a custom gossiping approach, which is more efficient than plain broadcasting, since there less overhead.\\
+    \textbf{My way of gossiping:} A node starts gossiping by sending an object \texttt{Gossip}, which contains the message and also a list of recipients, to all threads in it's table. The next node then send the gossip to everyone in his table, which is not among the recipient-nodes from the gossip he got. Each node that passes the gossip to others, adds the nodes it sent it to, to the recipients list in the \texttt{Gossip}-object. Therefore the amount a node receives the same gossip is reduced drastically.\\
+    \textbf{My implementation:} To reduce complexity, each node is already initialized with a full and randomly chosen table. After a node receives gossip, it distributes it to the other nodes in its list and terminates itself. In the end, a test indicates how many nodes have received the gossip. The program automatically indicates in which step of the propagation a node received the gossip. An example output is shown below.\\
+    At the beginning of the \texttt{Gossip.java}, there is a variable to specify the network size. The node to start the process of gossiping is chosen randomly.\\
+    \newline
+    \textit{Why gossiping does not guarantee that all nodes will get the update?}\\
+    Since it is not guaranteed that every node is in the table of the start-point-node or in one of those nodes tables. A node may know the connections to every other node in the network, although no other node has the connection to it. Therefore the node would not get the gossip.\\
+    Another possibility would be that the network is separated on one side. Imagine 4 nodes in a cluster A having connection-data of each other, while there are 4 other nodes in a cluster B which they don't know. While nodes in B might know nodes in A, the A-nodes are not aware of B. Gossip started in A will never reach a node in B, although the network is technically not separated.\\
+    
+    \subsection*{run part2)}
+    
+      To execute the second part, do the following:
+      \begin{itemize}
+        \item[1.] Navigate to the \texttt{part2/} directory.
+    	\item[2.] Run the main method of the java class \texttt{Gossiping.java}
+      \end{itemize}
+      Sample output:\\
+      \begin{lstlisting}[language=sh]
+        Start gossiping in a Network with 15 nodes!
+        Step 1: Node node11 received gossip I am gossip!
+        Step 2: Node node6 received gossip I am gossip!
+        Step 2: Node node14 received gossip I am gossip!
+        Step 2: Node node13 received gossip I am gossip!
+        Step 2: Node node15 received gossip I am gossip!
+        Step 2: Node node10 received gossip I am gossip!
+        Step 3: Node node2 received gossip I am gossip!
+        Step 3: Node node1 received gossip I am gossip!
+        Step 3: Node node3 received gossip I am gossip!
+        Step 3: Node node9 received gossip I am gossip!
+        Step 3: Node node8 received gossip I am gossip!
+        Step 3: Node node7 received gossip I am gossip!
+        Step 3: Node node4 received gossip I am gossip!
+        Step 3: Node node5 received gossip I am gossip!
+        Step 3: Node node12 received gossip I am gossip!
+        15/15 nodes received the gossip!
+      \end{lstlisting}
+      
+  \section*{Part 3)}
+  
+    My implementation contains a separate \texttt{NameServer}-thread, which holds a list of all the contact-data for the names of nodes. Methods of the \texttt{NameResolutionProtocol} are used to contact the server and resolve a name. If a node wants to resolve a name, it calls the \texttt{resolveName()} method of the \texttt{NameResolutionProtocol.java} class.\\
+    If there is no host for a name (a name can't be resolved), this information is returned to the calling node, which then removes that name from it's table.\\
+    To run the program (same functionality as in part1) with a name server, set the \texttt{boolean} variable \textit{withNameServer} at the top of the \texttt{Main.java} class to true. Then just start the program like it is described in the subsection \texttt{run part1} of the section \texttt{Part 1}.
+	
+\end{document}
