@@ -9,10 +9,12 @@ public class TableEntry implements Serializable {
 
   private String ip;
   private int port;
+  private String name;
 
-  public TableEntry(String ip, int port) {
+  public TableEntry(String ip, int port, String name) {
     this.ip = ip;
     this.port = port;
+    this.name = name;
   }
 
   public boolean equals(TableEntry toCompare) {
@@ -28,5 +30,9 @@ public class TableEntry implements Serializable {
 
   public int getPort() {
     return port;
+  }
+
+  public String getName() {
+    return name;
   }
 }

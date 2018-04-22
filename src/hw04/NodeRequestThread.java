@@ -1,5 +1,7 @@
 package hw04;
 
+import hw04.part3.NameResolutionProtocol;
+
 import java.io.EOFException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -32,8 +34,18 @@ public class NodeRequestThread implements Runnable {
   public void run() {
     while (true) {
       if (!table.isEmpty()) {
-        TableEntry randomEntry = getRandomNode(table.getList());
+        TableEntry randomEntry = null;
         try {
+          if (Main.withNameServer) {
+            String randomName = getRandomNode(table.getList()).getName();
+            randomEntry = NameResolutionProtocol.resolveName(randomName);
+            if (randomEntry.getIp().equals("-wrong-")) {
+              throw new SocketException();
+            }
+          } else {
+            randomEntry = getRandomNode(table.getList());
+          }
+
           Thread.sleep(5000);
           Socket socket = new Socket(randomEntry.getIp(), randomEntry.getPort());
           ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
@@ -50,6 +62,8 @@ public class NodeRequestThread implements Runnable {
         } catch (SocketException e) {
           table.removeEntry(randomEntry);
           System.err.println("Updated table for " + node + ", removed: "+randomEntry.getPort());
+        } catch (NullPointerException e) {
+
         } catch (Exception e) {
           e.printStackTrace();
         }

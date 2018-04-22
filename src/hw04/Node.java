@@ -46,14 +46,14 @@ public class Node implements Runnable {
 
     if (mode.equals("normal")) {
       // start thread to update table
-      es.submit(new NodeRequestThread(name, table, new TableEntry(ip, port)));
+      es.submit(new NodeRequestThread(name, table, new TableEntry(ip, port, name)));
 
       try {
         while (true) {
           Socket socket = serverSocket.accept();
           System.out.println("Node " + name + " accepted new request!");
 
-          es.submit(new NodeRequestHandler(name, table, socket, serverSocket, new TableEntry(ip, port)));
+          es.submit(new NodeRequestHandler(name, table, socket, serverSocket, new TableEntry(ip, port, name)));
         }
       } catch (SocketException se) {
         es.shutdown();
@@ -75,7 +75,8 @@ public class Node implements Runnable {
             newGossip = (Gossip) input.readObject();
           } catch (EOFException e) {}
 
-          es.submit(new NodeGossipHandler(name, table, serverSocket, new TableEntry(ip, port), newGossip, latestGossip));
+          es.submit(new NodeGossipHandler(name, table, serverSocket, new TableEntry(ip, port, name),
+            newGossip, latestGossip));
           latestGossip = newGossip;
           socket.close();
         }

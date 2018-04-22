@@ -1,5 +1,7 @@
 package hw04;
 
+import hw04.part3.NameServer;
+
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.ConnectException;
@@ -15,7 +17,8 @@ import java.util.stream.IntStream;
  */
 public class Main {
 
-  private final static int networkSize = 9;
+  public final static int networkSize = 9;
+  public final static boolean withNameServer = false;
 
   public static TableEntry getRandomInitNode(List<TableEntry> nodes, int port) {
     return nodes.stream()
@@ -32,11 +35,15 @@ public class Main {
 
   public static void main(String[] args) {
     List<TableEntry> nodes = IntStream.rangeClosed(1, networkSize)
-      .mapToObj(i -> new TableEntry("localhost", 8000+i))
+      .mapToObj(i -> new TableEntry("localhost", 8000+i, "node"+Integer.toString(i)))
       .collect(Collectors.toList());
 
+    if (withNameServer) {
+      new Thread(new NameServer(nodes)).start();
+    }
+
     IntStream.rangeClosed(1, networkSize)
-      .mapToObj(i -> new Node(Integer.toString(i), 8000+i,
+      .mapToObj(i -> new Node("node"+Integer.toString(i), 8000+i,
         getInitAsList(nodes, 8000+i, 1), 4, "normal"))
       .forEach(n -> new Thread(n).start());
 
@@ -47,7 +54,7 @@ public class Main {
     }
 
     IntStream.rangeClosed(networkSize+1, networkSize+3)
-      .mapToObj(i -> new Node(Integer.toString(i), 8000+i,
+      .mapToObj(i -> new Node("node"+Integer.toString(i), 8000+i,
         getInitAsList(nodes, 8000+i, 1), 4, "normal"))
       .forEach(n -> new Thread(n).start());
 
@@ -63,7 +70,7 @@ public class Main {
         try {
           Socket socket = new Socket(toShutdown.getIp(), toShutdown.getPort());
           ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
-          output.writeObject(new TableEntry("-shutdown-", 8888));
+          output.writeObject(new TableEntry("-shutdown-", 8888, "-shutdown-"));
           socket.close();
         } catch (ConnectException e) {
           // Node already shut down.

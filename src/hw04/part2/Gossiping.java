@@ -34,11 +34,11 @@ public class Gossiping {
     System.out.println("Start gossiping in a Network with "+networkSize+" nodes!");
 
     List<TableEntry> nodes = IntStream.rangeClosed(1, networkSize)
-      .mapToObj(i -> new TableEntry("localhost", 8000+i))
+      .mapToObj(i -> new TableEntry("localhost", 8000+i, "node"+Integer.toString(i)))
       .collect(Collectors.toList());
 
     IntStream.rangeClosed(1, networkSize)
-      .mapToObj(i -> new Node(Integer.toString(i), 8000+i,
+      .mapToObj(i -> new Node("node"+Integer.toString(i), 8000+i,
         getInitAsList(nodes, 8000+i, (networkSize/3)), (networkSize/3), "gossip"))
       .forEach(n -> new Thread(n).start());
 
