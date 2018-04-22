@@ -7,6 +7,7 @@ import hw04.TableEntry;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -29,6 +30,9 @@ public class Gossiping {
   }
 
   public static void main(String[] args) {
+
+    System.out.println("Start gossiping in a Network with "+networkSize+" nodes!");
+
     List<TableEntry> nodes = IntStream.rangeClosed(1, networkSize)
       .mapToObj(i -> new TableEntry("localhost", 8000+i))
       .collect(Collectors.toList());
@@ -51,5 +55,26 @@ public class Gossiping {
         e.printStackTrace();
       }
     }).start();
+
+    try {
+      Thread.sleep(2500);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+
+    int reachedNodes = 0;
+    for (TableEntry n : nodes) {
+      try {
+        Socket socket = new Socket(n.getIp(), n.getPort());
+        socket.close();
+      } catch (SocketException e) {
+        reachedNodes = reachedNodes+1;
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
+
+    System.out.println(reachedNodes+"/"+networkSize+" nodes received the gossip!");
+
   }
 }

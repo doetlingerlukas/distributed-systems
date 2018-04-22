@@ -47,6 +47,7 @@ public class NodeGossipHandler implements Runnable {
           .collect(Collectors.toList());
         newRecipients.stream()
           .forEach(e -> distributeGossip(e, new Gossip(newIteration, toDistribute, newRecipients)));
+        serverSocket.close();
       }
     } catch (Exception e) {
       System.err.println(node+" failed to reply!");
