@@ -2,6 +2,7 @@ package hw04;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.net.ConnectException;
 import java.net.Socket;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -13,7 +14,7 @@ import java.util.stream.IntStream;
  */
 public class Main {
 
-  private final static int networkSize = 8;
+  private final static int networkSize = 9;
 
   public static TableEntry getRandomInitNode(List<TableEntry> nodes, int port) {
     return nodes.stream()
@@ -28,7 +29,7 @@ public class Main {
       .collect(Collectors.toList());
 
     IntStream.rangeClosed(1, networkSize)
-      .mapToObj(i -> new Node(Integer.toString(i), 8000+i, getRandomInitNode(nodes, 8000+i)))
+      .mapToObj(i -> new Node(Integer.toString(i), 8000+i, getRandomInitNode(nodes, 8000+i), 4))
       .forEach(n -> new Thread(n).start());
 
     try {
@@ -37,8 +38,8 @@ public class Main {
       e.printStackTrace();
     }
 
-    IntStream.rangeClosed(networkSize+1, networkSize+4)
-      .mapToObj(i -> new Node(Integer.toString(i), 8000+i, getRandomInitNode(nodes, 8000+i)))
+    IntStream.rangeClosed(networkSize+1, networkSize+3)
+      .mapToObj(i -> new Node(Integer.toString(i), 8000+i, getRandomInitNode(nodes, 8000+i), 4))
       .forEach(n -> new Thread(n).start());
 
     try {
@@ -55,6 +56,8 @@ public class Main {
           ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
           output.writeObject(new TableEntry("-shutdown-", 8888));
           socket.close();
+        } catch (ConnectException e) {
+          // Node already shut down.
         } catch (IOException e) {
           e.printStackTrace();
         }

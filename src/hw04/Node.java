@@ -19,7 +19,7 @@ public class Node implements Runnable {
   private ServerSocket serverSocket;
   private Table table;
 
-  public Node(String name, int port, TableEntry init) {
+  public Node(String name, int port, TableEntry init, int tableSize) {
     this.name = name;
     this.port = port;
     try {
@@ -27,7 +27,7 @@ public class Node implements Runnable {
     } catch (IOException e) {
       System.err.println("Failed to start Node on port "+port+"!");
     }
-    this.table = new Table(name);
+    this.table = new Table(name, tableSize);
     this.table.addEntry(init);
   }
 
