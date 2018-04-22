@@ -23,7 +23,7 @@ public class Table implements Serializable {
     this.maxTableSize = maxTableSize;
   }
 
-  public boolean containsEntry(List<TableEntry> list, TableEntry entry) {
+  public static boolean containsEntry(List<TableEntry> list, TableEntry entry) {
     return list.stream()
       .anyMatch(e -> e.getIp().equals(entry.getIp()) && (e.getPort() == entry.getPort()));
   }

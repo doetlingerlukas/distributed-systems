@@ -1,5 +1,7 @@
 package hw04;
 
+import hw04.part2.NodeGossipHandler;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -18,8 +20,9 @@ public class Node implements Runnable {
   private int port;
   private ServerSocket serverSocket;
   private Table table;
+  private String mode;
 
-  public Node(String name, int port, TableEntry init, int tableSize) {
+  public Node(String name, int port, List<TableEntry> init, int tableSize, String mode) {
     this.name = name;
     this.port = port;
     try {
@@ -28,32 +31,43 @@ public class Node implements Runnable {
       System.err.println("Failed to start Node on port "+port+"!");
     }
     this.table = new Table(name, tableSize);
-    this.table.addEntry(init);
+    this.table.mergeList(init);
+    this.mode = mode;
   }
 
   @Override
   public void run() {
     System.out.println("Started Node "+name+" on port "+port+"!");
-
-    // request handling
     ExecutorService es = Executors.newFixedThreadPool(4);
 
-    // start thread to update table
-    es.submit(new NodeRequestThread(name, table, new TableEntry(ip, port)));
+    if (mode.equals("normal")) {
+      // start thread to update table
+      es.submit(new NodeRequestThread(name, table, new TableEntry(ip, port)));
 
-    try {
-      while (true) {
-        Socket socket = serverSocket.accept();
-        System.out.println("Node "+name+" accepted new request!");
+      try {
+        while (true) {
+          Socket socket = serverSocket.accept();
+          System.out.println("Node " + name + " accepted new request!");
 
-        es.submit(new NodeRequestHandler(name, table, socket, serverSocket, new TableEntry(ip, port)));
+          es.submit(new NodeRequestHandler(name, table, socket, serverSocket, new TableEntry(ip, port)));
+        }
+      } catch (SocketException se) {
+        es.shutdown();
+      } catch (Exception e) {
+        System.err.println("Node " + name + " failed!");
+      } finally {
+        System.err.println("Node " + name + " left network!");
       }
-    } catch (SocketException se) {
-      es.shutdown();
-    } catch (Exception e) {
-      System.err.println("Node "+name+" failed!");
-    } finally {
-      System.err.println("Node "+name+" left network!");
+    } else if (mode.equals("gossip")) {
+      try {
+        while (true) {
+          Socket socket = serverSocket.accept();
+
+          es.submit(new NodeGossipHandler(name, table, socket, serverSocket, new TableEntry(ip, port)));
+        }
+      } catch (Exception e) {
+        System.err.println("Node " + name + " failed!");
+      }
     }
   }
 }

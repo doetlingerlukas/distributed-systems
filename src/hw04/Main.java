@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.ConnectException;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
@@ -23,13 +24,20 @@ public class Main {
       .get(ThreadLocalRandom.current().nextInt(0, nodes.size()-1));
   }
 
+  public static List<TableEntry> getInitAsList(List<TableEntry> nodes, int port, int amount) {
+    return IntStream.rangeClosed(1, amount)
+      .mapToObj(i -> getRandomInitNode(nodes, port))
+      .collect(Collectors.toList());
+  }
+
   public static void main(String[] args) {
     List<TableEntry> nodes = IntStream.rangeClosed(1, networkSize)
       .mapToObj(i -> new TableEntry("localhost", 8000+i))
       .collect(Collectors.toList());
 
     IntStream.rangeClosed(1, networkSize)
-      .mapToObj(i -> new Node(Integer.toString(i), 8000+i, getRandomInitNode(nodes, 8000+i), 4))
+      .mapToObj(i -> new Node(Integer.toString(i), 8000+i,
+        getInitAsList(nodes, 8000+i, 1), 4, "normal"))
       .forEach(n -> new Thread(n).start());
 
     try {
@@ -39,7 +47,8 @@ public class Main {
     }
 
     IntStream.rangeClosed(networkSize+1, networkSize+3)
-      .mapToObj(i -> new Node(Integer.toString(i), 8000+i, getRandomInitNode(nodes, 8000+i), 4))
+      .mapToObj(i -> new Node(Integer.toString(i), 8000+i,
+        getInitAsList(nodes, 8000+i, 1), 4, "normal"))
       .forEach(n -> new Thread(n).start());
 
     try {
