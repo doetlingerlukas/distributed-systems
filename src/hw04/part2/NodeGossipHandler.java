@@ -3,14 +3,11 @@ package hw04.part2;
 import hw04.Table;
 import hw04.TableEntry;
 
-import java.io.EOFException;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.ConcurrentModificationException;
+import java.net.SocketException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,40 +18,35 @@ public class NodeGossipHandler implements Runnable {
 
   private String node;
   private Table table;
-  private Socket client;
   private ServerSocket serverSocket;
   private TableEntry me;
-  private Gossip latestGossip;
+  private Gossip gossip;
+  private Gossip oldGossip;
 
-  public NodeGossipHandler(String node, Table table, Socket client, ServerSocket serverSocket, TableEntry me) {
+  public NodeGossipHandler(String node, Table table, ServerSocket serverSocket, TableEntry me, Gossip g, Gossip og) {
     this.node = node;
     this.table = table;
-    this.client = client;
     this.serverSocket = serverSocket;
     this.me = me;
-    this.latestGossip = new Gossip("null", new ArrayList<>());
+    this.gossip = g;
+    this.oldGossip = og;
   }
 
   @Override
   public void run() {
     try {
-      ObjectInputStream input = new ObjectInputStream(client.getInputStream());
-      Gossip newGossip = latestGossip;
-      try {
-        newGossip = (Gossip) input.readObject();
-      } catch (EOFException e) {}
-      if (newGossip.getMessage().equals(latestGossip.getMessage())) {
-        client.close();
+      if (gossip.getMessage().equals(oldGossip.getMessage())) {
+        serverSocket.close();
       } else {
-        List<TableEntry> oldRecipients = newGossip.getRecipients();
-        String toDistribute = newGossip.getMessage();
-        System.out.println("Node "+node+" received gossip "+toDistribute);
+        List<TableEntry> oldRecipients = gossip.getRecipients();
+        String toDistribute = gossip.getMessage();
+        int newIteration = gossip.getIteration()+1;
+        System.out.println("Step "+(newIteration-1)+": Node "+node+" received gossip "+toDistribute);
         List<TableEntry> newRecipients = table.getList().stream()
           .filter(e -> !(Table.containsEntry(oldRecipients, e)))
           .collect(Collectors.toList());
         newRecipients.stream()
-          .forEach(e -> distributeGossip(e, new Gossip(toDistribute, newRecipients)));
-        client.close();
+          .forEach(e -> distributeGossip(e, new Gossip(newIteration, toDistribute, newRecipients)));
       }
     } catch (Exception e) {
       System.err.println(node+" failed to reply!");
@@ -68,6 +60,8 @@ public class NodeGossipHandler implements Runnable {
       ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
       output.writeObject(gossip);
       socket.close();
+    } catch (SocketException e) {
+      // Node has already terminated, since it received gossip.
     } catch (IOException e) {
       e.printStackTrace();
     }

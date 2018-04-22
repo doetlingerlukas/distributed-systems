@@ -6,7 +6,6 @@ import hw04.TableEntry;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.net.ConnectException;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,7 +18,7 @@ import java.util.stream.IntStream;
  */
 public class Gossiping {
 
-  private final static int networkSize = 15;
+  private final static int networkSize = 60;
 
   public static List<TableEntry> getInitAsList(List<TableEntry> nodes, int port, int amount) {
     List<TableEntry> localCopy = nodes.stream()
@@ -36,7 +35,7 @@ public class Gossiping {
 
     IntStream.rangeClosed(1, networkSize)
       .mapToObj(i -> new Node(Integer.toString(i), 8000+i,
-        getInitAsList(nodes, 8000+i, 5), 5, "gossip"))
+        getInitAsList(nodes, 8000+i, (networkSize/3)), (networkSize/3), "gossip"))
       .forEach(n -> new Thread(n).start());
 
     new Thread(() -> {
@@ -46,7 +45,7 @@ public class Gossiping {
       try {
         Socket socket = new Socket(gossipStartNode.getIp(), gossipStartNode.getPort());
         ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
-        output.writeObject(new Gossip("I am gossip!", startRecipients));
+        output.writeObject(new Gossip(1,"I am gossip!", startRecipients));
         socket.close();
       } catch (IOException e) {
         e.printStackTrace();

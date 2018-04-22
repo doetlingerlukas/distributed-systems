@@ -10,12 +10,18 @@ import java.util.List;
  */
 public class Gossip implements Serializable {
 
+  private int iteration;
   private String message;
   private List<TableEntry> recipients;
 
-  public Gossip(String msg, List<TableEntry> recipients) {
+  public Gossip(int iteration, String msg, List<TableEntry> recipients) {
+    this.iteration = iteration;
     this.message = msg;
     this.recipients = recipients;
+  }
+
+  public int getIteration() {
+    return iteration;
   }
 
   public String getMessage() {
