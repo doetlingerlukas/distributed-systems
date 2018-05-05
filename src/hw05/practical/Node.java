@@ -53,7 +53,7 @@ public class Node {
   public List<Node> findFingers(List<Node> table) {
     return IntStream.rangeClosed(2, Main.fingerTableSize)
       .mapToObj(i -> {
-        int toGet = (int) (this.id+Math.pow(2, i-1)) % Main.fingerTableSize;
+        int toGet = (int) (this.id+Math.pow(2, i-1)) % Main.chordCapacity;
         return findSuccessor(table, toGet);
       })
       .collect(Collectors.toList());
@@ -63,9 +63,11 @@ public class Node {
     setFingerTableAndSuccessor(table);
     this.fingerTable.clear();
     this.fingerTable = findFingers(table);
+    // add successor and predecessor to finger table
     Collections.reverse(fingerTable);
     fingerTable.add(successor);
     Collections.reverse(fingerTable);
+    fingerTable.add(predecessor);
     this.fingerTable = this.fingerTable.stream()
       .collect(Collectors.collectingAndThen(Collectors.toCollection(() ->
         new TreeSet<>(Comparator.comparingInt(Node::getId))), ArrayList::new));
