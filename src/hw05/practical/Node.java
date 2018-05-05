@@ -1,8 +1,8 @@
 package hw05.practical;
 
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * Created by Lukas Dötlinger.
@@ -35,6 +35,40 @@ public class Node {
       table.get(0) : table.get(tableIndex+1);
     this.predecessor = tableIndex == 0 ?
       table.get(table.size()-1) : table.get(tableIndex-1);
+  }
+
+  public Node findSuccessor(List<Node> table, int toGet) {
+    return table.stream()
+      .filter(n -> n.getId() >= toGet)
+      .collect(Collectors.toList())
+      .size() != 0 ?
+        table.stream()
+          .filter(n -> n.getId() >= toGet)
+          .min(Comparator.comparing(Node::getId))
+          .get() : table.stream()
+            .min(Comparator.comparing(Node::getId))
+            .get();
+  }
+
+  public List<Node> findFingers(List<Node> table) {
+    return IntStream.rangeClosed(2, Main.fingerTableSize)
+      .mapToObj(i -> {
+        int toGet = (int) (this.id+Math.pow(2, i-1)) % Main.fingerTableSize;
+        return findSuccessor(table, toGet);
+      })
+      .collect(Collectors.toList());
+  }
+
+  public void update(List<Node> table) {
+    setFingerTableAndSuccessor(table);
+    this.fingerTable.clear();
+    this.fingerTable = findFingers(table);
+    Collections.reverse(fingerTable);
+    fingerTable.add(successor);
+    Collections.reverse(fingerTable);
+    this.fingerTable = this.fingerTable.stream()
+      .collect(Collectors.collectingAndThen(Collectors.toCollection(() ->
+        new TreeSet<>(Comparator.comparingInt(Node::getId))), ArrayList::new));
   }
 
   public int getId() {

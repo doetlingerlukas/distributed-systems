@@ -9,7 +9,9 @@ import java.util.stream.Collectors;
  */
 public class Main {
 
-  private final static int chordSize = 5;
+  public final static int chordSize = 5;
+  public final static int fingerTableSize = 4;
+  public final static int chordCapacity = 16;
 
   public static void main(String[] args) {
     // initialize chord
@@ -23,6 +25,15 @@ public class Main {
       .forEach(node -> node.setFingerTableAndSuccessor(chord.stream()
         .sorted(Comparator.comparing(Node::getId))
         .collect(Collectors.toList())));
+
+    chord.stream()
+      .forEach(node -> Utils.printTable(node.getFingerTable(), node));
+
+    System.out.println("===============");
+
+    chord.add(new Node(7, "localhost:8007", "node7"));
+    chord.stream()
+      .forEach(node -> node.update(chord));
 
     chord.stream()
       .forEach(node -> Utils.printTable(node.getFingerTable(), node));
