@@ -23,12 +23,12 @@ public class Utils {
 
   public static void printTable(List<Node> table, Node node) {
     System.out.println("-----"+node.getName()+"-----");
-    System.out.println("Successor Id: "+node.getSuccessor().getId()+" Name: "+node.getSuccessor().getName()+
-      " Address: "+node.getSuccessor().getAddress());
-    System.out.println("Predecessor Id: "+node.getPredecessor().getId()+" Name: "+node.getPredecessor().getName()+
-      " Address: "+node.getPredecessor().getAddress());
+    System.out.println("Successor | Id: "+node.getSuccessor().getId()+" | Name: "+node.getSuccessor().getName()+
+      " | Address: "+node.getSuccessor().getAddress());
+    System.out.println("Predecessor | Id: "+node.getPredecessor().getId()+" | Name: "+node.getPredecessor().getName()+
+      " | Address: "+node.getPredecessor().getAddress());
     table.stream()
-      .forEach(n -> System.out.println("Id: "+n.getId()+" Name: "+n.getName()+" Address: "+n.getAddress()));
+      .forEach(n -> System.out.println("Id: "+n.getId()+" | Name: "+n.getName()+" | Address: "+n.getAddress()));
     System.out.println("---------------");
   }
 }

@@ -32,8 +32,28 @@ public class Main {
     System.out.println("===============");
 
     chord.add(new Node(7, "localhost:8007", "node7"));
+    System.out.println("Added node7");
+
+    System.out.println("===============");
+
     chord.stream()
-      .forEach(node -> node.update(chord));
+      .forEach(node -> node.update(chord.stream()
+        .sorted(Comparator.comparing(Node::getId))
+        .collect(Collectors.toList())));
+
+    chord.stream()
+      .forEach(node -> Utils.printTable(node.getFingerTable(), node));
+
+    System.out.println("===============");
+
+    System.out.println("Removed node"+chord.remove(2).getId());
+
+    System.out.println("===============");
+
+    chord.stream()
+      .forEach(node -> node.update(chord.stream()
+        .sorted(Comparator.comparing(Node::getId))
+        .collect(Collectors.toList())));
 
     chord.stream()
       .forEach(node -> Utils.printTable(node.getFingerTable(), node));
