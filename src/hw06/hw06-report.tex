@@ -1,0 +1,30 @@
+\documentclass{article}
+\usepackage[T1]{fontenc}
+
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{upgreek}
+
+\begin{document}
+  \title{Hw06 - Report - Distributed Systems}
+  \date{}
+  \author{Lukas Dötlinger, 01518316}
+	
+  \maketitle
+  
+  \section*{Introduction}
+  
+  	All parts of the homework sheet are completed.\\
+  	Introductions on how to run the code can be found below.\\
+  	
+  \section*{Implementation}
+  
+    All specifications from the homework-sheet are implemented. Each \texttt{Application.java} and \texttt{Middleware.java} are classes implementing the \texttt{Runnable} interface and represent apllication and middleware. Communication is done with \texttt{Sockets}.\\
+    Assuming that the number of messages to be received is known, objects of type \texttt{Message.java} are sent around. A \texttt{Message} also contains a timestamp, therefore an application can get the messages in the right order. After receiving all messages, they are sorted using the timestamp.\\
+    My implementation contains a class, which runs everything, \texttt{AutomatedStart.java}. It starts thre applications and their middleware.\\
+    
+  \section*{Run}
+  
+    To run the example, simply\\ \textbf{run the main method of the class AutomatedStart.java}.\\
+  
+\end{document}
