@@ -50,30 +50,15 @@ public class ReplicaManagement {
         chosen.add(i);
         return new HashMap.SimpleEntry<>(t, i);
       })
-      .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
+      .collect(Collectors.toMap(HashMap.Entry::getKey, HashMap.Entry::getValue));
   }
 
   private static Map<String, Map<String, Integer>> getAllRequests(List<String> dataCenters) {
     return dataCenters.stream()
       .map(d -> new HashMap.SimpleEntry<>(d, getRequestsForDataCenter(d, dataCenters).entrySet().stream()
         .filter(e -> e.getValue() != 0)
-        .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()))))
-      .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
-  }
-
-  private static Map<String, Double> getTotalLatencies(Map<String, Map<String, Integer>> requests,
-                                                       List<Connection> connections, Map<String, String> replicas) {
-    return requests.entrySet().stream()
-      .map(e1 -> new HashMap.SimpleEntry<>(e1.getKey(), e1.getValue().entrySet().stream()
-        .mapToDouble(e2 -> {
-          double latency = Connection.findFromList(connections, e1.getKey(), e2.getKey()).getLatency();
-          if (containsReplica(replicas, e1.getKey(), e2.getKey())) {
-            return w1 * (e2.getValue() + latency);
-          }
-          return w1 * ((latency+1) * e2.getValue());
-        })
-        .sum()))
-      .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
+        .collect(Collectors.toMap(HashMap.Entry::getKey, HashMap.Entry::getValue))))
+      .collect(Collectors.toMap(HashMap.Entry::getKey, HashMap.Entry::getValue));
   }
 
   private static Map<String, Map<String, Double>> getLatenciesPerConnection(Map<String, Map<String, Integer>> requests,
@@ -87,8 +72,17 @@ public class ReplicaManagement {
           }
           return new HashMap.SimpleEntry<>(e2.getKey(), w1 * (e2.getValue() * (latency+1)));
         })
-        .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()))))
-      .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
+        .collect(Collectors.toMap(HashMap.Entry::getKey, HashMap.Entry::getValue))))
+      .collect(Collectors.toMap(HashMap.Entry::getKey, HashMap.Entry::getValue));
+  }
+
+  private static Map<String, Double> getTotalLatencies(Map<String, Map<String, Integer>> requests,
+                                                       List<Connection> connections, Map<String, String> replicas) {
+    return getLatenciesPerConnection(requests, connections, replicas).entrySet().stream()
+      .map(e1 -> new HashMap.SimpleEntry<>(e1.getKey(), e1.getValue().values().stream()
+        .mapToDouble(d -> d)
+        .sum()))
+      .collect(Collectors.toMap(HashMap.Entry::getKey, HashMap.Entry::getValue));
   }
 
   private static boolean containsReplica(Map<String, String> replicas, String key, String val) {
@@ -124,6 +118,8 @@ public class ReplicaManagement {
 
     IntStream.range(0, connections.size())
       .forEach(i -> connections.get(i).setLatency(latencies.get(i)));
+
+    System.out.println("----- Initial latencies -----");
 
     connections.stream()
       .forEach(c -> System.out.println(c.getFrom()+" and "+c.getTo()+" with "+c.getLatency()*w1));
