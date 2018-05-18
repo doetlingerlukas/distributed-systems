@@ -26,8 +26,7 @@ public class ReplicaManagement {
 
   private static List<Connection> setupConnections(List<String> centers) {
     List<Connection> connections = new ArrayList<>();
-    centers.stream()
-      .forEach(center -> {
+    centers.forEach(center -> {
         centers.stream()
           .filter(c -> !c.equals(center))
           .map(c -> new Connection(0, center, c))
@@ -93,13 +92,13 @@ public class ReplicaManagement {
   private static Map<String, String> calculateOptimalReplicas(Map<String, Map<String, Double>> latencies,
                                                               List<Connection> connections) {
     Map<String, String> replicas = new HashMap<>();
-    latencies.entrySet().stream()
-      .forEach(e1 -> e1.getValue().entrySet().stream()
-        .forEach(e2 -> {
-          double latency = Connection.findFromList(connections, e1.getKey(), e2.getKey()).getLatency();
-          double requestAmount = e2.getValue() / (latency+1);
-          if ((((requestAmount+latency)*w1)+replicaCost) < e2.getValue()) {
-            replicas.put(e1.getKey(), e2.getKey());
+    latencies
+      .forEach((k1, v1) -> v1
+        .forEach((k2, v2) -> {
+          double latency = Connection.findFromList(connections, k1, k2).getLatency();
+          double requestAmount = v2 / (latency+1);
+          if ((((requestAmount+latency)*w1)+replicaCost) < v2) {
+            replicas.put(k1, k2);
           }
         }));
     return replicas;
@@ -121,8 +120,7 @@ public class ReplicaManagement {
 
     System.out.println("----- Initial latencies -----");
 
-    connections.stream()
-      .forEach(c -> System.out.println(c.getFrom()+" and "+c.getTo()+" with "+c.getLatency()*w1));
+    connections.forEach(c -> System.out.println(c.getFrom()+" and "+c.getTo()+" with "+c.getLatency()*w1));
 
     System.out.println("----- Initial costs -----");
 
@@ -130,11 +128,11 @@ public class ReplicaManagement {
     Map<String, Double> totalLatencies = getTotalLatencies(requests, connections, new HashMap<>());
     Map<String, Map<String, Double>> latenciesPerConnection = getLatenciesPerConnection(requests, connections, new HashMap<>());
 
-    latenciesPerConnection.entrySet().stream()
-      .forEach(e1 -> e1.getValue().entrySet().stream()
-        .forEach(e2 -> System.out.println(e1.getKey()+" to "+e2.getKey()+" latency: "+e2.getValue())));
-    totalLatencies.entrySet().stream()
-      .forEach(e -> System.out.println(e.getKey()+" latency cost: "+e.getValue()));
+    latenciesPerConnection
+      .forEach((k1, v1) -> v1
+        .forEach((k2, v2) -> System.out.println(k1+" to "+k2+" latency: "+v2)));
+    totalLatencies
+      .forEach((k, v) -> System.out.println(k+" latency cost: "+v));
     System.out.println("Total latency cost: "+totalLatencies.values().stream()
       .mapToDouble(d -> d)
       .sum());
@@ -146,14 +144,14 @@ public class ReplicaManagement {
     Map<String, String> optimalReplicas = calculateOptimalReplicas(latenciesPerConnection, connections);
     Map<String, Double> optimalTotalLatencies = getTotalLatencies(requests, connections, optimalReplicas);
 
-    optimalReplicas.entrySet().stream()
-      .forEach(e -> System.out.println(e.getKey()+" created replica of "+e.getValue()));
+    optimalReplicas
+      .forEach((k, v) -> System.out.println(k+" created replica of "+v));
 
-    getLatenciesPerConnection(requests, connections, optimalReplicas).entrySet().stream()
-      .forEach(e1 -> e1.getValue().entrySet().stream()
-        .forEach(e2 -> System.out.println(e1.getKey()+" to "+e2.getKey()+" latency: "+e2.getValue())));
-    optimalTotalLatencies.entrySet().stream()
-      .forEach(e -> System.out.println(e.getKey()+" latency cost: "+e.getValue()));
+    getLatenciesPerConnection(requests, connections, optimalReplicas)
+      .forEach((k1, v1) -> v1
+        .forEach((k2, v2) -> System.out.println(k1+" to "+k2+" latency: "+v2)));
+    optimalTotalLatencies
+      .forEach((k, v) -> System.out.println(k+" latency cost: "+v));
     System.out.println("Total optimal latency cost: "+optimalTotalLatencies.values().stream()
       .mapToDouble(d -> d)
       .sum());
