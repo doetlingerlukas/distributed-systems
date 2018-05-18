@@ -17,10 +17,27 @@ public class Connection {
     this.to = to;
   }
 
+  public static Connection findFromList(List<Connection> list, String from, String to) {
+    return list.stream()
+      .filter(c -> c.equals(from, to))
+      .findFirst()
+      .get();
+  }
+
   public boolean equals(Connection c) {
     if (from.equals(c.from) && to.equals(c.to)) {
       return true;
     } else if (from.equals(c.to) && to.equals(c.from)) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  public boolean equals(String from, String to) {
+    if (this.from.equals(from) && this.to.equals(to)) {
+      return true;
+    } else if (this.from.equals(to) && this.to.equals(from)) {
       return true;
     } else {
       return false;
