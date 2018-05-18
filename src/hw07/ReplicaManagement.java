@@ -11,7 +11,9 @@ import java.util.stream.IntStream;
 public class ReplicaManagement {
 
   private final static String matNumber = "01518316";
-  private final static double replicaCost = 30;
+  private final static double w1 = 0.75;
+  private final static double w2 = 0.25;
+  private final static double replicaCost = 30*w2;
 
   private static List<Integer> getInitialLatency(int amount) {
     List<Integer> matDigits = Arrays.stream(matNumber.split(""))
@@ -59,33 +61,54 @@ public class ReplicaManagement {
       .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
   }
 
-  private static Map<String, Integer> getTotalLatencies(Map<String, Map<String, Integer>> requests,
-                                                                   List<Connection> connections) {
+  private static Map<String, Double> getTotalLatencies(Map<String, Map<String, Integer>> requests,
+                                                       List<Connection> connections, Map<String, String> replicas) {
     return requests.entrySet().stream()
       .map(e1 -> new HashMap.SimpleEntry<>(e1.getKey(), e1.getValue().entrySet().stream()
-        .mapToInt(e2 -> (Connection.findFromList(connections, e1.getKey(), e2.getKey()).getLatency()+1) * e2.getValue())
+        .mapToDouble(e2 -> {
+          double latency = Connection.findFromList(connections, e1.getKey(), e2.getKey()).getLatency();
+          if (containsReplica(replicas, e1.getKey(), e2.getKey())) {
+            return w1 * (e2.getValue() + latency);
+          }
+          return w1 * ((latency+1) * e2.getValue());
+        })
         .sum()))
       .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
   }
 
-  private static Map<String, Map<String, Integer>> getLatenciesPerConnection(Map<String, Map<String, Integer>> requests,
-                                                        List<Connection> connections) {
+  private static Map<String, Map<String, Double>> getLatenciesPerConnection(Map<String, Map<String, Integer>> requests,
+                                                        List<Connection> connections, Map<String, String> replicas) {
     return requests.entrySet().stream()
       .map(e1 -> new HashMap.SimpleEntry<>(e1.getKey(), e1.getValue().entrySet().stream()
-        .map(e2 -> new HashMap.SimpleEntry<>(e2.getKey(), e2.getValue() *
-          (Connection.findFromList(connections, e1.getKey(), e2.getKey()).getLatency()+1)))
+        .map(e2 -> {
+          double latency = Connection.findFromList(connections, e1.getKey(), e2.getKey()).getLatency();
+          if (containsReplica(replicas, e1.getKey(), e2.getKey())) {
+            return new HashMap.SimpleEntry<>(e2.getKey(), w1 * (e2.getValue() + latency));
+          }
+          return new HashMap.SimpleEntry<>(e2.getKey(), w1 * (e2.getValue() * (latency+1)));
+        })
         .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()))))
       .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
   }
 
-  private static Map<String, Integer> getInitialStorageCost(Map<String, Map<String, Integer>> requests) {
-    return requests.entrySet().stream()
-      .map(e1 -> new HashMap.SimpleEntry<>(e1.getKey(), e1.getValue().entrySet().size() * 30))
-      .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
+  private static boolean containsReplica(Map<String, String> replicas, String key, String val) {
+    return replicas.entrySet().stream()
+      .anyMatch(e -> e.getKey().equals(key) && e.getValue().equals(val));
   }
 
-  private static double totalCost(double w1, double w2) {
-    return w1 + w2;
+  private static Map<String, String> calculateOptimalReplicas(Map<String, Map<String, Double>> latencies,
+                                                              List<Connection> connections) {
+    Map<String, String> replicas = new HashMap<>();
+    latencies.entrySet().stream()
+      .forEach(e1 -> e1.getValue().entrySet().stream()
+        .forEach(e2 -> {
+          double latency = Connection.findFromList(connections, e1.getKey(), e2.getKey()).getLatency();
+          double requestAmount = e2.getValue() / (latency+1);
+          if ((((requestAmount+latency)*w1)+replicaCost) < e2.getValue()) {
+            replicas.put(e1.getKey(), e2.getKey());
+          }
+        }));
+    return replicas;
   }
 
   public static void main(String[] args) {
@@ -103,26 +126,41 @@ public class ReplicaManagement {
       .forEach(i -> connections.get(i).setLatency(latencies.get(i)));
 
     connections.stream()
-      .forEach(c -> System.out.println(c.getFrom()+" and "+c.getTo()+" with "+c.getLatency()));
+      .forEach(c -> System.out.println(c.getFrom()+" and "+c.getTo()+" with "+c.getLatency()*w1));
 
     System.out.println("----- Initial costs -----");
 
     Map<String, Map<String, Integer>> requests = getAllRequests(dataCenters);
-    Map<String, Integer> totalLatencies = getTotalLatencies(requests, connections);
-    Map<String, Integer> totalInitialStorage = getInitialStorageCost(requests);
+    Map<String, Double> totalLatencies = getTotalLatencies(requests, connections, new HashMap<>());
+    Map<String, Map<String, Double>> latenciesPerConnection = getLatenciesPerConnection(requests, connections, new HashMap<>());
 
-    getLatenciesPerConnection(requests, connections).entrySet().stream()
+    latenciesPerConnection.entrySet().stream()
       .forEach(e1 -> e1.getValue().entrySet().stream()
         .forEach(e2 -> System.out.println(e1.getKey()+" to "+e2.getKey()+" latency: "+e2.getValue())));
     totalLatencies.entrySet().stream()
       .forEach(e -> System.out.println(e.getKey()+" latency cost: "+e.getValue()));
     System.out.println("Total latency cost: "+totalLatencies.values().stream()
-      .mapToInt(i -> i)
+      .mapToDouble(d -> d)
       .sum());
 
     System.out.println("There is no initial storage cost!");
 
     System.out.println("----- Optimized costs -----");
 
+    Map<String, String> optimalReplicas = calculateOptimalReplicas(latenciesPerConnection, connections);
+    Map<String, Double> optimalTotalLatencies = getTotalLatencies(requests, connections, optimalReplicas);
+
+    optimalReplicas.entrySet().stream()
+      .forEach(e -> System.out.println(e.getKey()+" created replica of "+e.getValue()));
+
+    getLatenciesPerConnection(requests, connections, optimalReplicas).entrySet().stream()
+      .forEach(e1 -> e1.getValue().entrySet().stream()
+        .forEach(e2 -> System.out.println(e1.getKey()+" to "+e2.getKey()+" latency: "+e2.getValue())));
+    optimalTotalLatencies.entrySet().stream()
+      .forEach(e -> System.out.println(e.getKey()+" latency cost: "+e.getValue()));
+    System.out.println("Total optimal latency cost: "+optimalTotalLatencies.values().stream()
+      .mapToDouble(d -> d)
+      .sum());
+    System.out.println("Total optimal storage cost: "+optimalReplicas.size()*replicaCost);
   }
 }
