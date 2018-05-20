@@ -1,0 +1,36 @@
+\documentclass{article}
+\usepackage[T1]{fontenc}
+
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{upgreek}
+\usepackage{amsmath}
+\usepackage{color}
+\usepackage{listings}
+\usepackage{graphicx}
+
+\begin{document}
+  \title{Hw05 - Report - Distributed Systems}
+  \date{}
+  \author{Lukas Dötlinger, 01518316}
+	
+  \maketitle
+  
+  \section*{Introduction}
+  
+  	To run the replica-management, simply execute the main method of the\\ \texttt{ReplicaManagement.java} file.\\
+  	
+  \section*{Implementation}
+  
+    Variables like \textit{w1}, \textit{w2} or \textit{replicaCost} can be changed in the \texttt{ReplicaManagement} class. They are given as \texttt{final} variables at the top.\\
+    In the \texttt{main} method, a list of data-centers is created. Afterwards the connections between them and their latencies are initialized using an algorithm on my matricular number.\\
+    \textbf{On each run, the requests, which a data-center sends to others, are randomly generated, while the total amount for one data-center to send being within a range of zero and fife.} Based on these requests, the total latencies are calculated. If for example A sends 4 requests to B, which would have a higher total latency than making a replica and accessing that, a new replica is added to the optimized version. I used following formula for that:
+    \begin{equation}
+      \begin{split}
+        if ( & (latency+1) * reqSize > latency + reqSize + repCost) \\
+        & create-replica
+      \end{split}
+    \end{equation}
+    After all optimal replicas were found, the total latencies are re-calculated. If replicas were made, the new total cost should be lower than the initial one.
+  
+\end{document}

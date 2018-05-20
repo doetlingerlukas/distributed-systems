@@ -130,7 +130,7 @@ public class ReplicaManagement {
 
     latenciesPerConnection
       .forEach((k1, v1) -> v1
-        .forEach((k2, v2) -> System.out.println(k1+" to "+k2+" latency: "+v2)));
+        .forEach((k2, v2) -> System.out.println(k1+" to "+k2+" latency cost: "+v2)));
     totalLatencies
       .forEach((k, v) -> System.out.println(k+" latency cost: "+v));
     System.out.println("Total latency cost: "+totalLatencies.values().stream()
@@ -149,7 +149,7 @@ public class ReplicaManagement {
 
     getLatenciesPerConnection(requests, connections, optimalReplicas)
       .forEach((k1, v1) -> v1
-        .forEach((k2, v2) -> System.out.println(k1+" to "+k2+" latency: "+v2)));
+        .forEach((k2, v2) -> System.out.println(k1+" to "+k2+" latency cost: "+v2)));
     optimalTotalLatencies
       .forEach((k, v) -> System.out.println(k+" latency cost: "+v));
     System.out.println("Total optimal latency cost: "+optimalTotalLatencies.values().stream()
