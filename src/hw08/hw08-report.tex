@@ -57,5 +57,28 @@
     \[ A_{2*SA} = 1 - (1 - 0.9302)^{2} = 0.99513 \approx 99.51 \% \]
     \[ A_{3*SA} = 1 - (1 - 0.9302)^{3} = 0.99966 \approx 99.96 \% \]
     So we need at least 3 redundant systems A, to reach an availability of over 99.9\%.\\
+    
+  \section*{Part 2)}
+    \subsection*{a)}
+    
+      Version 1 is implemented in the \texttt{Version1.java} file, which can be found in the \texttt{practical/} directory. The input parameters are specified as constants at the top of the class.\\
+      The implementation uses a Map with length equals \textit{T}. At each of the N iterations over the map, a probability-function, defined in \texttt{Utils.java} determines if an access was successful. At the end, the successful accesses are divided by the total amount, to get the probability for N redundant systems.\\
+      \newline
+      Sample output for N = 2 and failure-rate = 0.9756 :
+      \begin{lstlisting}[language=sh]
+        Availability: 0.9996
+      \end{lstlisting}
+      This is about what we expect from the theoretical calculation in subsection b) of Part 1). \textbf{Keep in mind that this is a sample output! Since we have some part of randomness in the program, the result may change by a small margin for each run.}\\
+      
+    \subsection*{b)}
+    
+      Version 2 is implemented in the \texttt{Version2.java} file, which can be found in the \texttt{practical/} directory. The input parameters are specified as constants at the top of the class.\\
+      Version2 is based on Version1, the difference though is that we have a given target-probability, for which we want to find the smallest possible N, instead of a given N. The same calculation for the availability as in the previous version is used inside a while loop. After each run, the N for testing is increased by one. Once the calculated probability is grater or equal the target, N is found.\\
+      \newline
+      Sample output for target-probability = 0.999 and failure-rate = 0.9302 :
+      \begin{lstlisting}[language=sh]
+        Availability 0.999 is reached with N >= 3
+      \end{lstlisting}
+      This is about what we expect from the theoretical calculation in subsection b) of Part 1).
   
 \end{document}
