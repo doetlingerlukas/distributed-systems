@@ -1,0 +1,61 @@
+\documentclass{article}
+\usepackage[T1]{fontenc}
+
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{upgreek}
+\usepackage{amsmath}
+\usepackage{color}
+\usepackage{listings}
+\usepackage{graphicx}
+
+\begin{document}
+  \title{Hw08 - Report - Distributed Systems}
+  \date{}
+  \author{Lukas Dötlinger, 01518316}
+	
+  \maketitle
+  
+  \section*{Indroduction}
+  
+  \section*{Part 1)}
+    \subsection*{a)}
+  
+    Availability is calculated using the following formula:\\
+    \begin{equation}
+      A = \frac{MTBF}{MTBF + MTTR}
+    \end{equation}
+    \textit{MTBF} ... \textbf{M}ean \textbf{T}ime \textbf{B}etween \textbf{F}ailure\\
+    \textit{MTTR} ... \textbf{M}ean \textbf{T}ime \textbf{T}o \textbf{R}epair\\
+    \newline
+    \textbf{System-A:}\\
+    Fails on average three times an hour. This results in an MTBF of $60/3 = 20$ min. Since the failure lasts about 30 seconds, we have an MTTR of $0.5$ min.\\
+    \[ A_{SA} = \frac{20}{20+0.5} = 0.\overline{97560} \approx 97.56 \% \]\\
+    \newline
+    \textbf{System-B:}\\
+    Fails on average thirty times an hour. This results in an MTBF of $60/30 = 2$ min. Since the failure lasts about 3 seconds, we have an MTTR of $0.05$ min.\\
+    \[ A_{SB} = \frac{2}{2+0.05} = 0.\overline{97560} \approx 97.56 \% \]\\
+    
+    \newpage
+    \subsection*{b)}
+    
+    Availability for multiple redundant systems is calculated using the following formula:\\
+    \begin{equation}
+      A_{n*SX} = 1 - (1 - A_{SX})^{n}
+    \end{equation}
+    \textit{n} ... number of redundant systems\\
+    $A_{SX}$ ... availability of one System-X\\
+    \newline
+    \textbf{System-A:}\\
+    We already know that availability for a system A is $97.56 \%$.\\
+    \[ A_{2*SA} = 1 - (1 - 0.\overline{97560})^{2} = 0.9994 \approx 99.94 \% \]
+    So we need at least 2 redundant systems A, to reach an availability of over 99.9\%.\\
+    \newline
+    \textbf{System-A with different MTBF:}
+    Fails on average three times in 20 minutes. This results in MTBF of $20/3 = 6.\dot{6}$ min. Since the failure lasts about 30 seconds, we have an MTTR of $0.5$ min.\\
+    \[ A_{SA} = \frac{6.\dot{6}}{6.\dot{6}+0.5} \approx 93.02 \% \]
+    \[ A_{2*SA} = 1 - (1 - 0.9302)^{2} = 0.99513 \approx 99.51 \% \]
+    \[ A_{3*SA} = 1 - (1 - 0.9302)^{3} = 0.99966 \approx 99.96 \% \]
+    So we need at least 3 redundant systems A, to reach an availability of over 99.9\%.\\
+  
+\end{document}
