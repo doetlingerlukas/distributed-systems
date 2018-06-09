@@ -22,6 +22,10 @@ correct_id=$(echo $instance_id | sed 's/[^a-zA-Z0-9-]//g')
 instance_ip=$(aws ec2 describe-instances --instance-ids $correct_id --query 'Reservations[0].Instances[0].PublicIpAddress')
 correct_ip=$(echo $instance_ip | sed 's/[^0-9.]//g')
 
+# wait until instance is running completely
+echo "Waiting for instance to get up and running ..."
+aws ec2 wait instance-status-ok --instance-ids $correct_id
+
 # echo elapsed time 
 echo "Starting the instance took $(($SECONDS-$START_TIME)) seconds!"
 
@@ -46,4 +50,4 @@ echo "Done!"
 
 # terminate the instance
 echo "Terminating instance ..."
-#aws ec2 terminate-instances --instance-ids $correct_id
+aws ec2 terminate-instances --instance-ids $correct_id --query 'TerminatingInstances[0].CurrentState.Name'
