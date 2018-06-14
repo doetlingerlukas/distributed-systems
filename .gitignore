@@ -14,4 +14,4 @@
 #Key-Files
 
 *.pem
-/src/hw11/keys.txt
+/src/hw11/*.txt

@@ -1,18 +1,15 @@
 #!/bin/bash
 
-readarray keys < keys.txt
+readarray keys < mKeys.txt
 access_key="${keys[0]}"
 secret_access_key="${keys[1]}"
 
 # settings
 imageid="ami-a36f8dc4" # Amazon Linux 64-Bit
 instance_type="t2.micro"
-key_name="windowsKey"
-key_location="windowsKey.pem"
-security_group_id="sg-c72188ae"
-
-cpp_file="hello-world.cpp"
-makefile="Makefile"
+key_name="mKey"
+key_location="mKey.pem"
+security_group_id="sg-9486e1ff"
 # end of settings
 
 # measure time
@@ -40,38 +37,21 @@ done
 # echo elapsed time 
 echo "Starting the instance took $(($SECONDS-$START_TIME)) seconds!"
 
+# copy key files to instance
+echo "Copying files to instance at $correct_ip ..."
+scp -o StrictHostKeyChecking=no -i $key_location mKeys.txt ec2-user@$correct_ip:/home/ec2-user
+scp -o StrictHostKeyChecking=no -i $key_location $key_location ec2-user@$correct_ip:/home/ec2-user
+
 # create an S3 bucket
 echo "Creating S3 bucket ..."
 aws s3 mb s3://doetlingerlukas-test-bucket
 
 # inside the instance
 echo "Connecting to instance at $correct_ip ..."
-ssh -o StrictHostKeyChecking=no -i $key_location ec2-user@$correct_ip << EOF
-	aws configure set aws_access_key_id $access_key
-    aws configure set aws_secret_access_key $secret_access_key
-	aws configure set default.region eu-west-2
-	fallocate -l 1K F1.dat
-	fallocate -l 10K F2.dat
-	fallocate -l 100k F3.dat
-	fallocate -l 1M F4.dat
-	fallocate -l 100M F5.dat
-	ls
-	echo "--------------------------"
-	/usr/bin/time -f "%e" aws s3 cp F1.dat s3://doetlingerlukas-test-bucket
-	echo "seconds for F1 to S3"
-	/usr/bin/time -f "%e" aws s3 cp F2.dat s3://doetlingerlukas-test-bucket
-	echo "seconds for F2 to S3"
-	/usr/bin/time -f "%e" aws s3 cp F3.dat s3://doetlingerlukas-test-bucket
-	echo "seconds for F3 to S3"
-	/usr/bin/time -f "%e" aws s3 cp F4.dat s3://doetlingerlukas-test-bucket
-	echo "seconds for F4 to S3"
-	/usr/bin/time -f "%e" aws s3 cp F5.dat s3://doetlingerlukas-test-bucket
-	echo "seconds for F5 to S3"
-	aws s3 ls s3://doetlingerlukas-test-bucket
-	echo "Done!"
-EOF
+ssh -o StrictHostKeyChecking=no -i $key_location ec2-user@$correct_ip 'bash -s' < aws-vm1-script.sh
 
-#scp -o StrictHostKeyChecking=no -i $key_location ec2-user@$correct_ip:/home/ec2-user/time.txt .
+# recieve time file
+scp -o StrictHostKeyChecking=no -i $key_location ec2-user@$correct_ip:/home/ec2-user/time.txt .
 
 # terminate the instance and delete the bucket 
 echo "Terminating instance ..."
