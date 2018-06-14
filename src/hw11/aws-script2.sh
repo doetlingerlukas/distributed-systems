@@ -24,29 +24,31 @@ correct_ip=$(echo $instance_ip | sed 's/[^0-9.]//g')
 
 # wait until instance is running completely
 echo "Waiting for instance to get up and running ..."
-aws ec2 wait instance-status-ok --instance-ids $correct_id
+aws ec2 wait instance-running --instance-ids $correct_id
+
+echo "Instance running, waiting for ssh port to be open ..."
+while ! ssh -o StrictHostKeyChecking=no -i $key_location ec2-user@$correct_ip 'exit'
+do
+    echo "Trying again..."
+	sleep 5
+done
 
 # echo elapsed time 
 echo "Starting the instance took $(($SECONDS-$START_TIME)) seconds!"
-
-# copy code files to instance
-echo "Copying files to instance at $correct_ip ..."
-scp -o StrictHostKeyChecking=no -i $key_location $cpp_file ec2-user@$correct_ip:/home/ec2-user
-scp -o StrictHostKeyChecking=no -i $key_location $makefile ec2-user@$correct_ip:/home/ec2-user
 
 # inside the instance
 echo "Connecting to instance at $correct_ip ..."
 ssh -o StrictHostKeyChecking=no -i $key_location ec2-user@$correct_ip << EOF
 	sudo yum -y update
 	sudo yum -y groupinstall "Development Tools"
-	gcc -v
-	echo "----------------------"
-	echo "Executing cpp code..."
-	echo "----------------------"
-	make run
+	fallocate -l 1K F1.dat
+  	fallocate -l 10K F2.dat
+  	fallocate -l 100k F3.dat
+  	fallocate -l 1M F4.dat
+  	fallocate -l 10M F5.dat
+  	ls
+	echo "Done!"
 EOF
-
-echo "Done!"
 
 # terminate the instance
 echo "Terminating instance ..."
