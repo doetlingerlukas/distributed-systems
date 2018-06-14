@@ -1,5 +1,9 @@
 #!/bin/bash
 
+readarray keys < keys.txt
+access_key="${keys[0]}"
+secret_access_key="${keys[1]}"
+
 # settings
 imageid="ami-a36f8dc4" # Amazon Linux 64-Bit
 instance_type="t2.micro"

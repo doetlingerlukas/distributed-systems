@@ -24,7 +24,14 @@ correct_ip=$(echo $instance_ip | sed 's/[^0-9.]//g')
 
 # wait until instance is running completely
 echo "Waiting for instance to get up and running ..."
-aws ec2 wait instance-status-ok --instance-ids $correct_id
+aws ec2 wait instance-running --instance-ids $correct_id
+
+echo "Instance running, waiting for ssh port to be open ..."
+while ! ssh -o StrictHostKeyChecking=no -i $key_location ec2-user@$correct_ip 'exit'
+do
+    echo "Trying again..."
+	sleep 5
+done
 
 # echo elapsed time 
 echo "Starting the instance took $(($SECONDS-$START_TIME)) seconds!"
