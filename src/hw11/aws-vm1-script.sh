@@ -47,14 +47,15 @@ correct_ip=$(echo $instance_ip | sed 's/[^0-9.]//g')
 
 # wait until instance is running completely
 echo "Waiting for instance 2 to get up and running ..."
-aws ec2 wait instance-status-ok --instance-ids $correct_id
+aws ec2 wait instance-running --instance-ids $correct_id
 
-#echo "Instance 2 running, waiting for ssh port to be open ..."
-#while ! ssh -o StrictHostKeyChecking=no -o LogLevel=ERROR -i $key_location ec2-user@$correct_ip 'exit' &> /dev/null
+echo "Instance 2 running, waiting for ssh port to be open ..."
+#while ! ssh -o StrictHostKeyChecking=no -i $key_location ec2-user@$correct_ip 'exit'
 #do
 #    echo "Not available, trying again..."
 #	sleep 5
 #done
+sleep 30
 
 # copy key files to instance
 echo "Copying key-files to instance 2 at $correct_ip ..."
@@ -70,6 +71,10 @@ echo "$({ TIMEFORMAT=%E; time scp -o StrictHostKeyChecking=no -i $key_location F
 echo "$({ TIMEFORMAT=%E; time scp -o StrictHostKeyChecking=no -i $key_location F4.dat ec2-user@$correct_ip:/home/ec2-user &>logfile; } 2>&1) seconds for VM1 to VM2" >> time.txt
 echo "$({ TIMEFORMAT=%E; time scp -o StrictHostKeyChecking=no -i $key_location F5.dat ec2-user@$correct_ip:/home/ec2-user &>logfile; } 2>&1) seconds for VM1 to VM2" >> time.txt
 echo "Done!"
+
+# inside the instance 2
+echo "Connecting to instance at $correct_ip ..."
+ssh -o StrictHostKeyChecking=no -i $key_location ec2-user@$correct_ip 'bash -s' < aws-vm2-script.sh
 
 # terminate the instance and delete the bucket 
 echo "Terminating instance 2 ..."

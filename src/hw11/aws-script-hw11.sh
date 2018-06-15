@@ -41,6 +41,7 @@ echo "Starting the instance took $(($SECONDS-$START_TIME)) seconds!"
 echo "Copying key-files to instance at $correct_ip ..."
 scp -o StrictHostKeyChecking=no -i $key_location mKeys.txt ec2-user@$correct_ip:/home/ec2-user
 scp -o StrictHostKeyChecking=no -i $key_location $key_location ec2-user@$correct_ip:/home/ec2-user
+scp -o StrictHostKeyChecking=no -i $key_location aws-vm2-script.sh ec2-user@$correct_ip:/home/ec2-user
 
 # create an S3 bucket
 echo "Creating S3 bucket ..."
@@ -51,6 +52,7 @@ echo "Connecting to instance at $correct_ip ..."
 ssh -o StrictHostKeyChecking=no -i $key_location ec2-user@$correct_ip 'bash -s' < aws-vm1-script.sh
 
 # recieve time file
+echo "Recieving time file ..."
 scp -o StrictHostKeyChecking=no -i $key_location ec2-user@$correct_ip:/home/ec2-user/time.txt .
 
 # terminate the instance and delete the bucket 
