@@ -19,12 +19,13 @@ aws configure set default.region eu-west-2
 chmod 400 $key_location
 
 # create local files 
+echo "Creating files ..."
 fallocate -l 1K F1.dat
 fallocate -l 10K F2.dat
 fallocate -l 100k F3.dat
 fallocate -l 1M F4.dat
-fallocate -l 100M F5.dat
-ls
+fallocate -l 10M F5.dat
+ls *.dat
 echo "--------------------------"
 
 # write files to S3 bucket and calculate time
@@ -65,16 +66,21 @@ scp -o StrictHostKeyChecking=no -i $key_location $key_location ec2-user@$correct
 # copy files to vm2
 echo "---------------------"
 echo "Copying local files to instance 2 ..."
-echo "$({ TIMEFORMAT=%E; time scp -o StrictHostKeyChecking=no -i $key_location F1.dat ec2-user@$correct_ip:/home/ec2-user &>logfile; } 2>&1) seconds for VM1 to VM2" >> time.txt
-echo "$({ TIMEFORMAT=%E; time scp -o StrictHostKeyChecking=no -i $key_location F2.dat ec2-user@$correct_ip:/home/ec2-user &>logfile; } 2>&1) seconds for VM1 to VM2" >> time.txt
-echo "$({ TIMEFORMAT=%E; time scp -o StrictHostKeyChecking=no -i $key_location F3.dat ec2-user@$correct_ip:/home/ec2-user &>logfile; } 2>&1) seconds for VM1 to VM2" >> time.txt
-echo "$({ TIMEFORMAT=%E; time scp -o StrictHostKeyChecking=no -i $key_location F4.dat ec2-user@$correct_ip:/home/ec2-user &>logfile; } 2>&1) seconds for VM1 to VM2" >> time.txt
-echo "$({ TIMEFORMAT=%E; time scp -o StrictHostKeyChecking=no -i $key_location F5.dat ec2-user@$correct_ip:/home/ec2-user &>logfile; } 2>&1) seconds for VM1 to VM2" >> time.txt
+echo "$({ TIMEFORMAT=%E; time scp -o StrictHostKeyChecking=no -i $key_location F1.dat ec2-user@$correct_ip:/home/ec2-user &>logfile; } 2>&1) seconds for F1 to VM2 from VM1" >> time.txt
+echo "$({ TIMEFORMAT=%E; time scp -o StrictHostKeyChecking=no -i $key_location F2.dat ec2-user@$correct_ip:/home/ec2-user &>logfile; } 2>&1) seconds for F2 to VM2 from VM1" >> time.txt
+echo "$({ TIMEFORMAT=%E; time scp -o StrictHostKeyChecking=no -i $key_location F3.dat ec2-user@$correct_ip:/home/ec2-user &>logfile; } 2>&1) seconds for F3 to VM2 from VM1" >> time.txt
+echo "$({ TIMEFORMAT=%E; time scp -o StrictHostKeyChecking=no -i $key_location F4.dat ec2-user@$correct_ip:/home/ec2-user &>logfile; } 2>&1) seconds for F4 to VM2 from VM1" >> time.txt
+echo "$({ TIMEFORMAT=%E; time scp -o StrictHostKeyChecking=no -i $key_location F5.dat ec2-user@$correct_ip:/home/ec2-user &>logfile; } 2>&1) seconds for F5 to VM2 from VM1" >> time.txt
 echo "Done!"
 
 # inside the instance 2
 echo "Connecting to instance at $correct_ip ..."
 ssh -o StrictHostKeyChecking=no -i $key_location ec2-user@$correct_ip 'bash -s' < aws-vm2-script.sh
+
+# recieve time2 file and merge it into local textfile
+echo "Recieving time file ..."
+scp -o StrictHostKeyChecking=no -i $key_location ec2-user@$correct_ip:/home/ec2-user/time2.txt .
+cat time2.txt >> time.txt
 
 # terminate the instance and delete the bucket 
 echo "Terminating instance 2 ..."
