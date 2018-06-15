@@ -3,9 +3,9 @@
 # settings
 imageid="ami-a36f8dc4" # Amazon Linux 64-Bit
 instance_type="t2.micro"
-key_name="windowsKey"
-key_location="windowsKey.pem"
-security_group_id="sg-c72188ae"
+key_name="mKey"
+key_location="mKey.pem"
+security_group_id="sg-9486e1ff"
 
 cpp_file="hello-world.cpp"
 makefile="Makefile"
@@ -27,9 +27,9 @@ echo "Waiting for instance to get up and running ..."
 aws ec2 wait instance-running --instance-ids $correct_id
 
 echo "Instance running, waiting for ssh port to be open ..."
-while ! ssh -o StrictHostKeyChecking=no -i $key_location ec2-user@$correct_ip 'exit'
+while ! ssh -o StrictHostKeyChecking=no -i $key_location ec2-user@$correct_ip 'exit' &>logfile
 do
-    echo "Trying again..."
+    echo "Not available, trying again..."
 	sleep 5
 done
 
