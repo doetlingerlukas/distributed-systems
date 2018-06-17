@@ -52,12 +52,11 @@ echo "Waiting for instance 2 to get up and running ..."
 aws ec2 wait instance-running --instance-ids $correct_id
 
 echo "Instance 2 running, waiting for ssh port to be open ..."
-#while ! ssh -o StrictHostKeyChecking=no -i $key_location ec2-user@$correct_ip 'exit'
-#do
-#    echo "Not available, trying again..."
-#	sleep 5
-#done
-sleep 30
+while ! ssh -o StrictHostKeyChecking=no -i $key_location ec2-user@$correct_ip 'exit' &>logfile
+do
+    echo "Not available, trying again..."
+	sleep 5
+done
 
 # copy key files to instance
 echo "Copying key-files to instance 2 at $correct_ip ..."
