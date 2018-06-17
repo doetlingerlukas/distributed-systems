@@ -54,6 +54,9 @@ ssh -o StrictHostKeyChecking=no -i $key_location ec2-user@$correct_ip 'bash -s' 
 # recieve time file
 echo "Recieving time file ..."
 scp -o StrictHostKeyChecking=no -i $key_location ec2-user@$correct_ip:/home/ec2-user/time.txt .
+echo "----- Result -----"
+cat time.txt
+echo "------------------"
 
 # terminate the instance and delete the bucket 
 echo "Terminating instance ..."

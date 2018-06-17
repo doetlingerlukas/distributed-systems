@@ -36,6 +36,7 @@ echo "$({ TIMEFORMAT=%E; time aws s3 cp F3.dat s3://doetlingerlukas-test-bucket 
 echo "$({ TIMEFORMAT=%E; time aws s3 cp F4.dat s3://doetlingerlukas-test-bucket &>logfile; } 2>&1) seconds for F4 to S3 from VM1" >> time.txt
 echo "$({ TIMEFORMAT=%E; time aws s3 cp F5.dat s3://doetlingerlukas-test-bucket &>logfile; } 2>&1) seconds for F5 to S3 from VM1" >> time.txt
 aws s3 ls s3://doetlingerlukas-test-bucket
+echo " " >> time.txt
 echo "Done!"
 
 # start second instance and get ip address
@@ -71,6 +72,7 @@ echo "$({ TIMEFORMAT=%E; time scp -o StrictHostKeyChecking=no -i $key_location F
 echo "$({ TIMEFORMAT=%E; time scp -o StrictHostKeyChecking=no -i $key_location F3.dat ec2-user@$correct_ip:/home/ec2-user &>logfile; } 2>&1) seconds for F3 to VM2 from VM1" >> time.txt
 echo "$({ TIMEFORMAT=%E; time scp -o StrictHostKeyChecking=no -i $key_location F4.dat ec2-user@$correct_ip:/home/ec2-user &>logfile; } 2>&1) seconds for F4 to VM2 from VM1" >> time.txt
 echo "$({ TIMEFORMAT=%E; time scp -o StrictHostKeyChecking=no -i $key_location F5.dat ec2-user@$correct_ip:/home/ec2-user &>logfile; } 2>&1) seconds for F5 to VM2 from VM1" >> time.txt
+echo " " >> time.txt
 echo "Done!"
 
 # inside the instance 2
